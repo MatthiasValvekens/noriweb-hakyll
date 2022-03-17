@@ -6,12 +6,12 @@
     <section class="section article-info">
         <h2 class="is-sr-only">Article info</h2>
         <p>
-        Posted on <time datetime="$date$">$date$</time>
-        $if(author)$
+            <span class="fas fa-calendar" aria-hidden="true"></span> <time datetime="$date$">$date$</time>
+        </p>
+        <p>
             <span itemscope itemtype="http://schema.org/Person">
-                by <span itemprop="name">$author$</span>
+                <span class="fas fa-user" aria-hidden="true"></span> <span itemprop="name">$author$</span>
             </span>
-        $endif$
         </p>
     </section>
     <section class="section blog-paras"$if(lang)$ lang="$lang$"$endif$>
