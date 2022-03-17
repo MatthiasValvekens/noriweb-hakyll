@@ -6,8 +6,6 @@ import Hakyll
 import Text.Pandoc.Definition
 import Text.Pandoc.Walk (walkPandocM)
 
-import Data.List (nub, intercalate)
-import Data.Maybe (fromMaybe)
 import qualified Data.Text as T
 import qualified Data.HashMap.Strict as HMS
 import Data.Text.Encoding (encodeUtf8, decodeUtf8)
@@ -86,30 +84,11 @@ hakyllRules = do
             makeItem ("" :: String)
                 >>= loadAndApplyTemplate "templates/sitemap.xml" (rootCtx <> pgCtx)
 
-    -- Build tags and tag summary pages
-    tags <- buildTags ("blog/**" .&&. hasNoVersion) (fromCapture tagPagePattern)
-    -- this generates the actual tag summary pages
-    tagsRules tags $ \tag pattern -> do
-        route idRoute
-        compile $ do
-            posts <- recentFirst =<< loadAll pattern
-            let ctx = constField "tag" tag
-                    -- read summary
-                    <> listField "posts" (postCtx tags) (return posts)
-                    <> constField "title" ("Entries tagged \"" ++ tag ++ "\"")
-                    <> copyrightContext
-                    <> keywordsContext
-                    <> defaultContext
-
-            makeItem ("" :: String)
-                >>= loadAndApplyTemplate "templates/tag-overview.html" ctx
-                >>= loadAndApplyTemplate "templates/default.html" ctx
-
     match "blog.html" $ do
         route idRoute
         compile $ do
             posts <- recentFirst =<< loadAll ("blog/**" .&&. hasNoVersion)
-            let ctx = listField "posts" (postCtx tags) (return posts)
+            let ctx = listField "posts" postCtx (return posts)
                     <> copyrightContext
                     <> defaultContext
             getResourceBody
@@ -117,8 +96,8 @@ hakyllRules = do
                 >>= loadAndApplyTemplate "templates/default.html" ctx
 
     match "blog/**" $ do
-        route $ setExtension "html"
-        let ctx = field "article-meta" jsonldMetaForItem <> postCtx tags
+        route $ gsubRoute "^blog/[0-9]+/" (const "blog/") `composeRoutes` setExtension ".html"
+        let ctx = field "article-meta" jsonldMetaForItem <> postCtx
         compile $ pandocBlogPostCompiler
             >>= loadAndApplyTemplate "templates/post.html" ctx 
             >>= loadAndApplyTemplate "templates/default.html" ctx
@@ -126,7 +105,7 @@ hakyllRules = do
     match "blog/**" $ version "jsonld-meta" $ do
         -- override the url field to point to the base version
         let ctx = field "abs-url" (absoluteUri . forBaseVer) 
-                <> field "url" (routeOrFail . forBaseVer) <> postCtx tags 
+                <> field "url" (routeOrFail . forBaseVer) <> postCtx
         compile $ makeItem ("" :: String)
             >>= loadAndApplyTemplate "templates/jsonld/article-info.json" ctx
 
@@ -147,8 +126,6 @@ hakyllRules = do
 rootUrl :: String
 rootUrl = "https://noriko.yakushiji.be"
 
-tagPagePattern :: Pattern
-tagPagePattern = "tags/*.html"
 
 getStringFromMeta :: String -> Identifier -> Compiler String
 getStringFromMeta entryKey ident = do
@@ -179,25 +156,12 @@ absoluteUri :: Identifier -> Compiler String
 absoluteUri = fmap (rootUrl++) . routeOrFail
 
 
-postCtx :: Tags -> Context String
-postCtx tags =  tagsField "tags" tags 
-             -- Use the One True Date Order (YYYY-mm-dd)
-             <> dateField "date" "%F" 
-             <> keywordsContext
+postCtx :: Context String
+postCtx = dateField "date" "%F" 
+             <> fieldFromItemMeta "lang"
              <> copyrightContext
              <> defaultContext
 
-
-keywordsContext :: Context String
-keywordsContext = field "keywords" $ \item -> do
-    metadata <- getMetadata (itemIdentifier item)
-    -- intention: tags is for blog posts, keywords for metadata
-    let keywordsMeta = fromMaybe [] (lookupStringList "keywords" metadata)
-    let tagsMeta = fromMaybe [] (lookupStringList "tags" metadata)
-    -- only retain uniques
-    let keywords = nub $ keywordsMeta ++ tagsMeta
-    if null keywords then noResult "No keywords" 
-                     else (return $ intercalate ", " keywords)
 
 mainAuthor :: String
 mainAuthor = "Noriko Yakushiji"
@@ -206,16 +170,17 @@ getItemAuthor :: Item a -> Compiler (Maybe String)
 getItemAuthor item = getMetadata (itemIdentifier item)
         >>= return . lookupString "author"
 
+
 copyrightContext :: Context String
-copyrightContext = field "author" (getItemAuthor >=> checkAuthor)
+copyrightContext = field "author" (fmap checkAuthor . getItemAuthor)
         <> fieldFromItemMeta "author-url"
         <> field "copyrightline" (fmap cline . getItemAuthor)
     where cline Nothing = mainAuthor
           cline (Just author)
             | author == mainAuthor = mainAuthor
             | otherwise = author <> ", " <> mainAuthor
-          checkAuthor Nothing = noResult "No author"
-          checkAuthor (Just author) = return author
+          checkAuthor Nothing = mainAuthor
+          checkAuthor (Just author) = author
 
 -------------------------------------------------
 -- Pandoc stuff for blog posts

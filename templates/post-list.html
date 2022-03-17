@@ -1,0 +1,17 @@
+<div class="container">
+    <ul>
+    $for(posts)$
+    <li class="media">
+        <div class="media-content">
+            <div class="content">
+                <p>
+                <strong>$date$</strong> $if(author)$<span class="is-italic has-text-weight-light" style="margin-left: 1rem;">@$author$</span>$endif$
+                <br>
+                <a href="$url$">$title$</a>
+                </p>
+            </div>
+        </div>
+    </li>
+    $endfor$
+    </ul>
+</div>
