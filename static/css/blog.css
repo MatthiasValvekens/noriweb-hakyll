@@ -1,0 +1,102 @@
+/* Blog text styling */
+
+.blog-paras {
+    max-width: 80ch;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.blog-title {
+    margin-top: 1.5rem;
+}
+
+.blog-paras p {
+    margin-top: 0.7rem;
+    margin-bottom: 1rem;
+}
+
+.blog-paras h2 {
+    margin-top: 3rem;
+}
+
+.blog-paras h3 {
+    margin-top: 2rem;
+}
+
+section.article-info {
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.footnotes hr {
+    background-color: #cccccc;
+}
+
+.blog-paras .note:before {
+    content: "Note";
+    font-weight: bold;
+    font-variant: small-caps;
+}
+
+.blog-paras .note {
+    border-radius: 1em;
+    background-color: #eaeff2;
+    padding: 1em;
+    margin-bottom: 1em;
+}
+
+.blog-paras .warning:before {
+    content: "Warning";
+    font-weight: bold;
+    font-variant: small-caps;
+}
+
+.blog-paras .warning {
+    border-radius: 1em;
+    background-color: #fbf5c4;
+    padding: 1em;
+    margin-bottom: 1em;
+}
+
+.blog-paras .youtube iframe {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.blog-paras .tldr:before {
+    content: "TL;DR";
+    font-weight: bold;
+    font-variant: small-caps;
+}
+
+.blog-paras .tldr {
+    border-radius: 1em;
+    background-color: #dddddd;
+    padding: 1em;
+    margin-bottom: 1em;
+}
+
+.blog-paras ul {
+    list-style: disc;
+    padding-left: 1em;
+}
+
+
+/* Bibliography */
+
+.csl-left-margin {
+    width: 18ex;
+    float: left;
+    font-weight: bold;
+}
+
+.csl-right-inline {
+    margin-left: 20ex;
+}
+
+
+.csl-entry {
+    margin-bottom: 0.5em;
+    margin-top: 0.5em;
+}

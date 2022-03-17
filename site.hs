@@ -6,8 +6,7 @@ import Hakyll
 import Text.Pandoc.Definition
 import Text.Pandoc.Walk (walkPandocM)
 
-import Data.Ord (comparing)
-import Data.List (sortBy, nub, intercalate)
+import Data.List (nub, intercalate)
 import Data.Maybe (fromMaybe)
 import qualified Data.Text as T
 import qualified Data.HashMap.Strict as HMS
@@ -15,7 +14,7 @@ import Data.Text.Encoding (encodeUtf8, decodeUtf8)
 
 import Data.ByteString.Lazy (toStrict)
 
-import Control.Monad (liftM, (>=>), msum)
+import Control.Monad ((>=>), msum)
 
 import qualified GHC.IO.Encoding as E
 
@@ -63,19 +62,16 @@ hakyllRules = do
                   >>= loadAndApplyTemplate "templates/default.html" ctx
 
     create ["profile.html"] $ do
-        route idRoute
-        compile $ do
-            sections <- sortByMetadata "order" =<< loadAll "about/*.html"
-
-            let aboutSecCtx = iconContext <> labelContext <> defaultContext
-            let aboutCtx 
-                    = listField "about-sections" aboutSecCtx (return sections)
-                    <> constField "title" "About Me"
-                    <> field "extrastyle" (const $ loadBody "about/style.css")
+        route idRoute 
+        compile $ do 
+            let aboutCtx = constField "title" "Bio"
+                    <> field "extrastyle" (const $ loadBody "profile/style.css")
+                    <> profileForLang "en"
+                    <> profileForLang "ja"
                     <> copyrightContext
                     <> defaultContext
-
-            makeItem ("" :: String)
+            makeItem ("" :: String) 
+                >>= loadAndApplyTemplate "templates/profile.html" aboutCtx
                 >>= loadAndApplyTemplate "templates/default.html" aboutCtx
 
     -- Loosely based on https://robertwpearce.com/hakyll-pt-2-generating-a-sitemap-xml-file.html
@@ -83,7 +79,7 @@ hakyllRules = do
         route idRoute
         compile $ do
             posts <- recentFirst =<< loadAll ("blog/**" .&&. hasNoVersion)
-            specialPages <- loadAll (fromList ["about.html", "contact.html", "blog.html"])
+            specialPages <- loadAll (fromList ["profile.html", "contact.html", "blog.html"])
             let pages = specialPages ++ posts
             let rootCtx = constField "rootUrl" rootUrl
             let pgCtx = listField "pages" (rootCtx <> defaultContext) (return pages)
@@ -136,8 +132,14 @@ hakyllRules = do
 
     match "templates/**" $ compile templateBodyCompiler
     match "snippets/**" $ compile getResourceBody
+    match "profile/**" $ compile getResourceBody
 
     where forBaseVer = setVersion Nothing . itemIdentifier
+          profileForLang :: String -> Context String
+          profileForLang lang = field name (const $ itemBody <$> rendered)
+            where name = "profile-" <> lang
+                  fname = fromFilePath $ "profile/profile-" <> lang <> ".md"
+                  rendered = load fname >>= renderPandoc
 
 
 --------------------------------------------------------------------------------
@@ -185,12 +187,6 @@ postCtx tags =  tagsField "tags" tags
              <> copyrightContext
              <> defaultContext
 
-iconContext :: Context String
-iconContext = fieldFromItemMeta "icon"
-
-labelContext :: Context String
-labelContext = fieldFromItemMeta "label"
-
 
 keywordsContext :: Context String
 keywordsContext = field "keywords" $ \item -> do
@@ -220,15 +216,6 @@ copyrightContext = field "author" (getItemAuthor >=> checkAuthor)
             | otherwise = author <> ", " <> mainAuthor
           checkAuthor Nothing = noResult "No author"
           checkAuthor (Just author) = return author
-
-sortByMetadata :: (MonadMetadata m, MonadFail m) => String -> [Item a] -> m [Item a]
-sortByMetadata theMeta = sortByM $ extract . itemIdentifier
-  where
-    sortByM f xs = liftM (map fst . sortBy (comparing snd)) $
-                   mapM (\x -> liftM (x,) (f x)) xs
-    extract idt = do
-        metadata <- getMetadata idt
-        return $ lookupString theMeta metadata
 
 -------------------------------------------------
 -- Pandoc stuff for blog posts

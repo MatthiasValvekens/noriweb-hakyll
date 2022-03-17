@@ -1,0 +1,25 @@
+#content-wrapper {
+    padding-top: 3.25rem;
+    display: flex;
+    min-height: 100vh;
+    flex-direction: column;
+    align-items: stretch;
+}
+
+#content-wrapper > main {
+    flex-grow: 1;
+    padding-bottom: 3rem;
+}
+
+#content-wrapper > main, #content-wrapper > footer {
+    flex-shrink: 0;
+}
+
+#content-wrapper > footer {
+    /* Bulma sets 6rem, which is too much. */
+    padding-bottom: 3rem;
+}
+
+.link-list li:not(:last-child) {
+    margin-bottom: 1ex;
+}

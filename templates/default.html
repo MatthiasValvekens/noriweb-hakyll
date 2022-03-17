@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en-gb">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        $if(author)$<meta name="author" content="$author$">$endif$
+        $if(keywords)$<meta name="keywords" content="$keywords$">$endif$
+        <title>Noriko Yakushiji 薬師寺典子&ndash; $title$</title>
+        <link rel="stylesheet" href="/static/css/bulma.min.css">
+        <link rel="stylesheet" href="/static/css/fontawesome-all.min.css">
+        <link rel="stylesheet" href="/static/css/blog.css">
+        <!-- see /static/css/LICENSE.syntax -->
+        <link rel="stylesheet" href="/static/css/syntax.css">
+        <link rel="stylesheet" href="/static/css/misc.css">
+        $if(extrastyle)$
+        <style>
+            $extrastyle$
+        </style>
+        $endif$
+        <script src="/static/js/website-nav.js"></script>
+        <script>document.addEventListener('DOMContentLoaded', activateNavbarBurger);</script>
+    </head>
+    <body>
+        <header class="header">
+            <nav class="navbar is-fixed-top" aria-label="main navigation" id="main-navbar">
+                <div class="navbar-brand">
+                    <div class="navbar-item">
+                        NY
+                    </div>
+                    <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+                        <span aria-hidden="true"></span>
+                        <span aria-hidden="true"></span>
+                        <span aria-hidden="true"></span>
+                    </a>
+                </div>
+                <div class="navbar-menu">
+                    <div class="navbar-start">
+                        <a class="navbar-item" href="/">
+                            Home
+                        </a>
+                        <a class="navbar-item" href="/profile.html">
+                            Profile
+                        </a>
+                        <a class="navbar-item" href="/blog.html">
+                            Blog
+                        </a>
+                        <a class="navbar-item" href="/contact.html">
+                            Contact
+                        </a>
+                    </div>
+                </div>
+            </nav>
+        </header>
+        <div id="content-wrapper">
+            <main>
+                $body$
+            </main>
+            <footer class="footer has-text-centered is-size-7">
+                $partial("templates/copyright.html")$
+            </footer>
+        </div>
+    </body>
+</html>
