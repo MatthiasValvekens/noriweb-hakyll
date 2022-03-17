@@ -1,4 +1,4 @@
-name:               hakyll-site
+name:               noriweb-hakyll
 version:            0.1.0.0
 build-type:         Simple
 cabal-version:      >= 1.10
