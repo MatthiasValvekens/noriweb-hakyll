@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en-gb">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Noriko Yakushiji 薬師寺典子</title>
+        <link rel="stylesheet" href="/static/css/bulma.min.css">
+        <link rel="stylesheet" href="/static/css/fontawesome-all.min.css">
+        <style>
+            * { box-shadow: none !important; }
+            html {
+                height: 100vh;
+                width: 100vw;
+            }
+            body {
+                height: 100vh;
+                width: 100vw;
+            }
+
+            div.is-widescreen {
+                max-width: 100%;
+                width: 100%;
+            }
+
+            .column {
+                align-items: stretch;
+            }
+
+            #name {
+                margin-left: auto;
+                margin-right: auto;
+                margin-bottom: 2rem;
+                margin-top: 2rem;
+                line-height: 1.5em;
+            }
+
+            #maininfo .box {
+                margin-bottom: 0;
+            }
+        </style>
+        <script src="/static/js/website-nav.js"></script>
+        <script>document.addEventListener('DOMContentLoaded', handleFragment);</script>
+    </head>
+    <body>
+        <article class="transparent is-paddingless is-marginless">
+            <div class="container is-widescreen is-marginless is-paddingless is-centered is-max-desktop">
+                <div class="columns">
+                    <div class="column is-6 is-half shadowless is-paddingless is-gapless" style="margin-top: 0; margin-bottom: 0;">
+                        <figure class="image transparent">
+                            <img src="/static/images/noriko.jpg" alt="Noriko Yakushiji">
+                        </figure>
+                    </div>
+                    <div class="column is-5 is-offset-1 is-half is-paddingless is-gapless" id="maininfo">
+                        <h1 class="title is-2 has-text-centered has-text-black-ter is-family-secondary" id="name">
+                            Noriko Yakushiji<br/>薬師寺典子
+                        </h1>
+                        <section class="box">
+                            <h2 class="is-sr-only">Navigation</h2>
+                            <div class="subtitle is-3 has-text-centered has-text-weight-light">
+                                Soprano
+                            </div>
+                            <figure class="image is-128x128" style="margin-left: auto; margin-right: auto; margin-bottom: 1rem;">
+                                <img class="is-rounded has-background-white" style="border-width: thin; border-color: #ccc; border-style: solid;" src="/static/images/face.jpg" alt="Profile picture">
+                            </figure>
+
+                            <nav class="has-text-centered is-size-4">
+                                <ul>
+                                    <li>
+                                        <a href="index.html">Home</a>
+                                    </li>
+                                    <li>
+                                        <a href="profile.html">Profile</a>
+                                    </li>
+                                    <li>
+                                        <a href="blog.html">Blog</a> 
+                                    </li>
+                                </ul>
+                            </nav>
+                        </section>
+                        <section class="box">
+                            $snippet("snippets/contact-info.html")$
+                        </section>
+                        <section class="box">
+                            <h2 class="is-6 has-text-centered has-text-weight-light" style="margin-top: 1rem;">
+                                Photo credit
+                            </h2>
+                            <p class="has-text-centered">&#xA9; Ayane Shindo</p>
+                        </section>
+                    </div>
+                </div>
+            </div>
+        </article>
+    </body>
+</html>
