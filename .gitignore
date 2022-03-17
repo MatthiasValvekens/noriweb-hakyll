@@ -35,3 +35,4 @@ scratchpad
 _cache/
 _site/
 deploy.sh
+workspace_data
