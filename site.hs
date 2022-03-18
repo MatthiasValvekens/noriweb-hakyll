@@ -5,6 +5,8 @@ import Hakyll
 
 import Text.Pandoc.Definition
 import Text.Pandoc.Walk (walkPandocM)
+import Text.Pandoc.Shared (stringify)
+import Text.Pandoc (writeMarkdown, runPure)
 
 import qualified Data.Text as T
 import qualified Data.HashMap.Strict as HMS
@@ -95,6 +97,15 @@ hakyllRules = do
                 >>= applyAsTemplate ctx
                 >>= loadAndApplyTemplate "templates/default.html" ctx
 
+    match "media.html" $ do
+        route idRoute
+        compile $ do
+            let ctx = field "youtube" (const $ loadBody "media/youtube.md")
+                    <> copyrightContext <> defaultContext
+            getResourceBody
+                >>= applyAsTemplate ctx
+                >>= loadAndApplyTemplate "templates/default.html" ctx
+
     match "blog/**" $ do
         route $ gsubRoute "^blog/[0-9]+/" (const "blog/") `composeRoutes` setExtension ".html"
         let ctx = field "article-meta" jsonldMetaForItem <> postCtx
@@ -112,6 +123,8 @@ hakyllRules = do
     match "templates/**" $ compile templateBodyCompiler
     match "snippets/**" $ compile getResourceBody
     match "profile/**" $ compile getResourceBody
+    match "media/**" $ compile pandocMediaListCompiler
+        
 
     where forBaseVer = setVersion Nothing . itemIdentifier
           profileForLang :: String -> Context String
@@ -230,23 +243,36 @@ formatInlineMetadata orig@(CodeBlock attr jsonMeta)
 formatInlineMetadata orig = return orig
 
 
-formatYoutubeFromMeta :: T.Text -> T.Text -> Compiler (Item String)
-formatYoutubeFromMeta ytid jsonMeta = do
+formatYoutubeFromMeta :: (T.Text, T.Text, [Block]) -> T.Text -> Compiler (Item String)
+formatYoutubeFromMeta (ytid, name, descr) jsonMeta = do
         rawObj <- grabJsonObj jsonMeta
         width <- extractIntOrFail "width" rawObj
         height <- extractIntOrFail "height" rawObj
         title <- extractStringOrFail "name" rawObj
         let videoUrl = "https://www.youtube.com/watch?v=" <> ytid
-        let embedUrl = "https://www.youtube-nocookie.com/embed/" <> ytid
+        let embedUrl = "https://www.youtube.com/embed/" <> ytid
         let thumbnailUrl = "https://img.youtube.com/vi/" <> ytid <> "/maxresdefault.jpg"
         let contentUrl = "https://youtube.googleapis.com/v/" <> ytid
-        let newObj = HMS.insert "embedUrl" (Aes.String embedUrl)
+        -- only override name/description if actually provided
+        let nameIns = if T.null name
+                      then id
+                      else HMS.insert "name" (Aes.String name)
+        let descrPandoc = Pandoc (Meta mempty) descr
+        descrText <- case runPure (writeMarkdown defaultHakyllWriterOptions descrPandoc) of
+            Right x -> return x
+            Left _ -> fail "Failed to compile description to markdown"
+        let descrIns = if null descr 
+                       then id
+                       else HMS.insert "description" (Aes.String descrText)
+        let newObj = nameIns $ descrIns
+                   $ HMS.insert "embedUrl" (Aes.String embedUrl)
                    $ HMS.insert "thumbnailUrl" (Aes.String thumbnailUrl)
                    $ HMS.insert "contentUrl" (Aes.String contentUrl) rawObj
         let ctx = constField "width" (show width) <> constField "height" (show height)
                 <> constField "embed-url" (T.unpack embedUrl)
                 <> constField "video-url" (T.unpack videoUrl)
                 <> constField "youtube-meta" (jsonString newObj)
+                <> constField "caption" (itemBody $ writePandoc $ Item "" descrPandoc)
                 <> constField "title" title
         makeItem ("" :: String) >>= loadAndApplyTemplate templateName ctx
     where templateName = "templates/youtube-embed.html"
@@ -263,15 +289,32 @@ formatYoutubeFromMeta ytid jsonMeta = do
                 _ -> fail $ "No string key " ++ T.unpack key ++ " in YouTube meta"
 
 
+embedYoutubeMediaItems :: Block -> Compiler Block
+embedYoutubeMediaItems orig@(Div (_, classes, _) kids)
+    | not ("youtube" `elem` classes) = return orig
+    | otherwise = case kids of
+            (h@(Header _ _ nameInl):Div _ descr:CodeBlock attr jsonMeta:[]) -> do
+                let name = stringify nameInl
+                ytid <- extractPandocAttr "ytid" kvals
+                ytEmbedItem <- formatYoutubeFromMeta (ytid, name, descr) jsonMeta
+                let ytContent = RawBlock "html" $ T.pack $ itemBody ytEmbedItem
+                return $ Div ("", [], []) [h, ytContent]
+                where (_, _, kvals) = attr
+            _ -> return orig
+
+embedYoutubeMediaItems orig = return orig
+
+
 embedYoutubeVideos :: Block -> Compiler Block
 embedYoutubeVideos orig@(CodeBlock attr jsonMeta)
     | not ("youtube" `elem` classes) = return orig
     | otherwise = do
         ytid <- extractPandocAttr "ytid" kvals
-        ytEmbedItem <- formatYoutubeFromMeta ytid jsonMeta
+        ytEmbedItem <- formatYoutubeFromMeta (ytid, "", []) jsonMeta
         let ytContent = RawBlock "html" $ T.pack $ itemBody ytEmbedItem
         return $ Div (elId, classes, []) [ytContent]
     where (elId, classes, kvals) = attr
+
 
 embedYoutubeVideos orig = return orig
 
@@ -287,4 +330,11 @@ pandocBlogPostCompiler :: Compiler (Item String)
 pandocBlogPostCompiler = getResourceBody >>= readPandoc >>= processPandoc
     where transform = walkPandocM $ return . shiftAndStyleHeadings 1 
                         >=> embedYoutubeVideos >=> formatInlineMetadata
+          processPandoc = withItemBody transform >=> return . writePandoc
+
+
+pandocMediaListCompiler :: Compiler (Item String)
+pandocMediaListCompiler = getResourceBody >>= readPandoc >>= processPandoc
+    where transform = walkPandocM $ return . shiftAndStyleHeadings 1 
+                        >=> embedYoutubeMediaItems >=> formatInlineMetadata
           processPandoc = withItemBody transform >=> return . writePandoc
