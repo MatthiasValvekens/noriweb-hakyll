@@ -230,15 +230,12 @@ formatInlineMetadata orig@(CodeBlock attr jsonMeta)
 formatInlineMetadata orig = return orig
 
 
-embedYoutubeVideos :: Block -> Compiler Block
-embedYoutubeVideos orig@(CodeBlock attr jsonMeta)
-    | not ("youtube" `elem` classes) = return orig
-    | otherwise = do
+formatYoutubeFromMeta :: T.Text -> T.Text -> Compiler (Item String)
+formatYoutubeFromMeta ytid jsonMeta = do
         rawObj <- grabJsonObj jsonMeta
         width <- extractIntOrFail "width" rawObj
         height <- extractIntOrFail "height" rawObj
         title <- extractStringOrFail "name" rawObj
-        ytid <- extractPandocAttr "ytid" kvals
         let videoUrl = "https://www.youtube.com/watch?v=" <> ytid
         let embedUrl = "https://www.youtube-nocookie.com/embed/" <> ytid
         let thumbnailUrl = "https://img.youtube.com/vi/" <> ytid <> "/maxresdefault.jpg"
@@ -251,12 +248,8 @@ embedYoutubeVideos orig@(CodeBlock attr jsonMeta)
                 <> constField "video-url" (T.unpack videoUrl)
                 <> constField "youtube-meta" (jsonString newObj)
                 <> constField "title" title
-        ytEmbedItem <- makeItem ("" :: String) >>= loadAndApplyTemplate templateName ctx
-        let ytContent = RawBlock "html" $ T.pack $ itemBody ytEmbedItem
-        return $ Div (elId, classes, []) [ytContent]
-        
-    where (elId, classes, kvals) = attr
-          templateName = "templates/youtube-embed.html" 
+        makeItem ("" :: String) >>= loadAndApplyTemplate templateName ctx
+    where templateName = "templates/youtube-embed.html"
           extractIntOrFail :: T.Text -> Aes.Object -> Compiler Int
           extractIntOrFail key obj = do
             case HMS.lookup key obj of
@@ -268,6 +261,17 @@ embedYoutubeVideos orig@(CodeBlock attr jsonMeta)
             case HMS.lookup key obj of
                 Just (Aes.String x) -> return (T.unpack x)
                 _ -> fail $ "No string key " ++ T.unpack key ++ " in YouTube meta"
+
+
+embedYoutubeVideos :: Block -> Compiler Block
+embedYoutubeVideos orig@(CodeBlock attr jsonMeta)
+    | not ("youtube" `elem` classes) = return orig
+    | otherwise = do
+        ytid <- extractPandocAttr "ytid" kvals
+        ytEmbedItem <- formatYoutubeFromMeta ytid jsonMeta
+        let ytContent = RawBlock "html" $ T.pack $ itemBody ytEmbedItem
+        return $ Div (elId, classes, []) [ytContent]
+    where (elId, classes, kvals) = attr
 
 embedYoutubeVideos orig = return orig
 
