@@ -1,6 +1,6 @@
 
 <section class="section">
-    <h1 class="title has-text-centered">List of blog entries</h1>
+    <h1 class="title has-text-centered">Blog</h1>
     <ul class="container">
     $for(posts)$
     <li class="media">
@@ -9,8 +9,17 @@
                 <p>
                 <strong>$date$</strong> $if(author)$<span class="is-italic has-text-weight-light" style="margin-left: 1rem;">@$author$</span>$endif$
                 <br>
-                <a href="$url$">$title$</a>
+                <a href="$url$" style="color: #333">$title$</a>
                 </p>
+                $if(preview)$
+                <div class="preview has-text-grey">
+                    <p>
+                        $preview$
+                        <span class="has-text-grey-light">...</span>
+                    </p>
+                </div>
+                $endif$
+                <a href="$url$" aria-label="Read $title$">Read &raquo;</a>
             </div>
         </div>
     </li>

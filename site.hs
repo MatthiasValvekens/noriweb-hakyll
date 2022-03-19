@@ -88,14 +88,15 @@ hakyllRules = do
                 >>= loadAndApplyTemplate "templates/sitemap.xml" (rootCtx <> pgCtx)
 
     blogPagination <- do
-        let grp = liftM (paginateEvery 6) . sortRecentFirst
+        let grp = liftM (paginateEvery 5) . sortRecentFirst
         buildPaginateWith grp ("blog/**/*.md" .&&. hasNoVersion) blogPageId
 
     paginateRules blogPagination $ \page pattern -> do
         route idRoute
         compile $ do
             posts <- recentFirst =<< loadAll pattern
-            let ctx = listField "posts" postCtx (return posts)
+            let postInListCtx = postCtx <> field "preview" getPreview
+            let ctx = listField "posts" postInListCtx (return posts)
                     <> radialPaginationContext 2 blogPagination page
                     <> copyrightContext
                     <> defaultContext
@@ -126,6 +127,8 @@ hakyllRules = do
         compile $ makeItem ("" :: String)
             >>= loadAndApplyTemplate "templates/jsonld/article-info.json" ctx
 
+    match "blog/**/*.md" $ version "preview" $ compile (pandocPreviewCompiler)
+
     match "templates/**" $ compile templateBodyCompiler
     match "snippets/**" $ compile getResourceBody
     match "profile/**" $ compile getResourceBody
@@ -141,6 +144,8 @@ hakyllRules = do
           blogPageId :: PageNumber -> Identifier
           blogPageId 1 = "blog.html"
           blogPageId n = fromFilePath $ "blog/pagelist/" ++ show n ++ ".html"
+
+          getPreview = loadBody . setVersion (Just "preview") . itemIdentifier
 
 
 --------------------------------------------------------------------------------
@@ -461,3 +466,13 @@ pandocMediaListCompiler = getResourceBody >>= readPandoc >>= processPandoc
     where transform = walkPandocM $ embedYoutubeMediaItems 
                         >=> embedSoundcloudMediaItems >=> formatInlineMetadata
           processPandoc = withItemBody transform >=> return . writePandoc
+
+
+pandocPreviewCompiler :: Compiler (Item String)
+pandocPreviewCompiler = getResourceBody >>= readPandoc >>= render
+    where render = withItemBody reduceToFirstPara >=> return . writePandoc
+          reduceToFirstPara (Pandoc _ blks) = reduceToFirstPara' blks
+          reduceToFirstPara' [] = noResult "no preview"
+          reduceToFirstPara' (x:xs) = case x of
+            Para inl -> return (Pandoc (Meta mempty) [Plain inl])
+            _ -> reduceToFirstPara' xs
