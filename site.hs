@@ -97,14 +97,11 @@ hakyllRules = do
                 >>= applyAsTemplate ctx
                 >>= loadAndApplyTemplate "templates/default.html" ctx
 
-    match "media.html" $ do
-        route idRoute
+    match "media.md" $ do
+        route (setExtension ".html")
         compile $ do
-            let ctx = field "youtube" (const $ loadBody "media/youtube.md")
-                    <> field "soundcloud" (const $ loadBody "media/soundcloud.md")
-                    <> copyrightContext <> defaultContext
-            getResourceBody
-                >>= applyAsTemplate ctx
+            let ctx = copyrightContext <> defaultContext
+            pandocMediaListCompiler
                 >>= loadAndApplyTemplate "templates/default.html" ctx
 
     match "blog/**" $ do
@@ -124,7 +121,6 @@ hakyllRules = do
     match "templates/**" $ compile templateBodyCompiler
     match "snippets/**" $ compile getResourceBody
     match "profile/**" $ compile getResourceBody
-    match "media/**" $ compile pandocMediaListCompiler
         
 
     where forBaseVer = setVersion Nothing . itemIdentifier
