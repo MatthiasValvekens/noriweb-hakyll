@@ -342,7 +342,9 @@ scApiUrl trackId = scPlayerUrl <> "https%3A//api.soundcloud.com/tracks/" <> trac
 formatSoundcloudFromMeta :: Embedded -> T.Text -> Compiler (Item String)
 formatSoundcloudFromMeta (Embedded trackId name descr captionStyle) jsonMeta = do
         rawObj <- grabJsonObj jsonMeta
-        title <- extractStringOrFail "name" rawObj
+        title <- if T.null name
+                 then extractStringOrFail "name" rawObj
+                 else return (T.unpack name)
         url <- extractStringOrFail "url" rawObj
         let embedUrl = scApiUrl trackId
         -- only override name/description if actually provided

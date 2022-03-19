@@ -1,3 +1,10 @@
 #content-wrapper h2 {
     margin-top: 1em;
 }
+
+#content-wrapper figcaption {
+    border-style: none none none solid;
+    border-color: #333;
+    padding-left: 1ex;
+    color: #888;
+}
