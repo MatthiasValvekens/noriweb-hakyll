@@ -58,8 +58,8 @@ Oeil by Daryl Jamieson
   "@type": "AudioObject",
   "name": "Oeil",
   "url": "https://soundcloud.com/daryl-jamieson-1/oeil-2008",
-  "uploadDate": "2020-12-19",
-  "duration": "PT8M9S",  
+  "uploadDate": "2017-03-25",
+  "duration": "PT6M4S",  
   "width": 560,
   "height": 315,
   "author": [
