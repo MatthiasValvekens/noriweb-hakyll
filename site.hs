@@ -9,12 +9,13 @@ import Text.Pandoc.Shared (stringify)
 import Text.Pandoc (writeMarkdown, runPure)
 
 import qualified Data.Text as T
+import qualified Data.Map as M
 import qualified Data.HashMap.Strict as HMS
 import Data.Text.Encoding (encodeUtf8, decodeUtf8)
 
 import Data.ByteString.Lazy (toStrict)
 
-import Control.Monad ((>=>), msum)
+import Control.Monad ((>=>), msum, liftM)
 
 import qualified GHC.IO.Encoding as E
 
@@ -78,7 +79,7 @@ hakyllRules = do
     create ["sitemap.xml"] $ do
         route idRoute
         compile $ do
-            posts <- recentFirst =<< loadAll ("blog/**" .&&. hasNoVersion)
+            posts <- recentFirst =<< loadAll ("blog/**/*.md" .&&. hasNoVersion)
             specialPages <- loadAll (fromList ["profile.html", "contact.html", "blog.html"])
             let pages = specialPages ++ posts
             let rootCtx = constField "rootUrl" rootUrl
@@ -86,15 +87,20 @@ hakyllRules = do
             makeItem ("" :: String)
                 >>= loadAndApplyTemplate "templates/sitemap.xml" (rootCtx <> pgCtx)
 
-    match "blog.html" $ do
+    blogPagination <- do
+        let grp = liftM (paginateEvery 6) . sortRecentFirst
+        buildPaginateWith grp ("blog/**/*.md" .&&. hasNoVersion) blogPageId
+
+    paginateRules blogPagination $ \page pattern -> do
         route idRoute
         compile $ do
-            posts <- recentFirst =<< loadAll ("blog/**" .&&. hasNoVersion)
+            posts <- recentFirst =<< loadAll pattern
             let ctx = listField "posts" postCtx (return posts)
+                    <> radialPaginationContext 2 blogPagination page
                     <> copyrightContext
                     <> defaultContext
-            getResourceBody
-                >>= applyAsTemplate ctx
+            makeItem ("" :: String)
+                >>= loadAndApplyTemplate "templates/post-list.html" ctx
                 >>= loadAndApplyTemplate "templates/default.html" ctx
 
     match "media.css" $ compile getResourceBody
@@ -106,14 +112,14 @@ hakyllRules = do
             pandocMediaListCompiler
                 >>= loadAndApplyTemplate "templates/default.html" ctx
 
-    match "blog/**" $ do
-        route $ gsubRoute "^blog/[0-9]+/" (const "blog/") `composeRoutes` setExtension ".html"
+    match "blog/**/*.md" $ do
+        route $ gsubRoute "^blog/[0-9]+/" (const "blog/post/") `composeRoutes` setExtension ".html"
         let ctx = field "article-meta" jsonldMetaForItem <> postCtx
         compile $ pandocBlogPostCompiler
             >>= loadAndApplyTemplate "templates/post.html" ctx 
             >>= loadAndApplyTemplate "templates/default.html" ctx
 
-    match "blog/**" $ version "jsonld-meta" $ do
+    match "blog/**/*.md" $ version "jsonld-meta" $ do
         -- override the url field to point to the base version
         let ctx = field "abs-url" (absoluteUri . forBaseVer) 
                 <> field "url" (routeOrFail . forBaseVer) <> postCtx
@@ -131,6 +137,10 @@ hakyllRules = do
             where name = "profile-" <> lang
                   fname = fromFilePath $ "profile/profile-" <> lang <> ".md"
                   rendered = load fname >>= renderPandoc
+
+          blogPageId :: PageNumber -> Identifier
+          blogPageId 1 = "blog.html"
+          blogPageId n = fromFilePath $ "blog/pagelist/" ++ show n ++ ".html"
 
 
 --------------------------------------------------------------------------------
@@ -194,8 +204,52 @@ copyrightContext = field "author" (fmap checkAuthor . getItemAuthor)
           checkAuthor Nothing = mainAuthor
           checkAuthor (Just author) = author
 
+
+data PageNumInfo = PageNumInfo 
+                 { pniGetPageNum :: PageNumber
+                 , pniGetPageUrl :: String }
+
+
+radialPaginationContext :: PageNumber -> Paginate -> PageNumber -> Context a
+radialPaginationContext rad p curPage = paginateContext p curPage 
+                                      <> before <> after
+    where -- for each number, build the URL to the page using getRoute
+          pgNumItem :: PageNumber -> Compiler (Item PageNumInfo)
+          pgNumItem n = do
+            maybeRoute <- getRoute (paginateMakeId p n)
+            case maybeRoute of
+                Nothing -> fail $ "Couldn't retrieve URL for page " ++ show n
+                Just rt -> makeItem $ PageNumInfo n (toUrl rt)
+
+          -- turn a PageNumInfo into template fields
+          pgNumCtx :: Context PageNumInfo
+          pgNumCtx = field "pageNum" fmtPgNum <> field "pageUrl" fmtPgUrl
+            where fmtPgNum = return . show . pniGetPageNum . itemBody
+                  fmtPgUrl = return . pniGetPageUrl . itemBody
+          lastPageNum = M.size $ paginateMap p
+          seqOrNoResult [] = noResult "No pages"
+          seqOrNoResult xs = sequence xs
+          before = pgsField <> elide
+            where pgsField = listField "pagesBefore" pgNumCtx (seqOrNoResult pgs)
+                  fstInSet = max 2 (curPage - rad)
+                  elide = field "elideBefore" $ const $ do
+                    case fstInSet > 2 && not (null pgs) of
+                        True -> return "elide"
+                        False -> noResult "no ellipsis"
+                  pgs = [pgNumItem n | n <- [fstInSet .. curPage - 1]]
+          after = pgsField <> elide
+            where pgsField = listField "pagesAfter" pgNumCtx (seqOrNoResult pgs)
+                  lastInSet = min (lastPageNum - 1) (curPage + rad)
+                  elide = field "elideAfter" $ const $ do
+                    case lastInSet < lastPageNum - 1 && not (null pgs) of
+                        True -> return "elide"
+                        False -> noResult "no ellipsis"
+                  pgs = [pgNumItem n | n <- [curPage + 1 .. lastInSet]]
+
+
 -------------------------------------------------
 -- Pandoc stuff for blog posts
+
 
 
 shiftAndStyleHeadings :: Int -> Block -> Block
