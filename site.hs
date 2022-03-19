@@ -80,7 +80,7 @@ hakyllRules = do
         route idRoute
         compile $ do
             posts <- recentFirst =<< loadAll ("blog/**/*.md" .&&. hasNoVersion)
-            specialPages <- loadAll (fromList ["profile.html", "contact.html", "blog.html"])
+            specialPages <- loadAll (fromList ["profile.html", "contact.html", "blog.html", "media.md"])
             let pages = specialPages ++ posts
             let rootCtx = constField "rootUrl" rootUrl
             let pgCtx = listField "pages" (rootCtx <> defaultContext) (return pages)
