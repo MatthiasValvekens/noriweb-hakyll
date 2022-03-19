@@ -264,7 +264,9 @@ formatYoutubeFromMeta (Embedded ytid name descr captionStyle) jsonMeta = do
         rawObj <- grabJsonObj jsonMeta
         width <- extractIntOrFail "width" rawObj
         height <- extractIntOrFail "height" rawObj
-        title <- extractStringOrFail "name" rawObj
+        title <- if T.null name
+                 then extractStringOrFail "name" rawObj
+                 else return (T.unpack name)
         let videoUrl = "https://www.youtube.com/watch?v=" <> ytid
         let embedUrl = "https://www.youtube.com/embed/" <> ytid
         let thumbnailUrl = "https://img.youtube.com/vi/" <> ytid <> "/maxresdefault.jpg"
