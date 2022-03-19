@@ -283,6 +283,7 @@ formatYoutubeFromMeta (Embedded ytid name descr captionStyle) jsonMeta = do
                        then id
                        else HMS.insert "description" (Aes.String descrText)
         let newObj = nameIns $ descrIns
+                   $ HMS.insert "name" (Aes.String $ T.pack title)
                    $ HMS.insert "url" (Aes.String videoUrl)
                    $ HMS.insert "embedUrl" (Aes.String embedUrl)
                    $ HMS.insert "thumbnailUrl" (Aes.String thumbnailUrl)
