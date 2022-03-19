@@ -97,10 +97,12 @@ hakyllRules = do
                 >>= applyAsTemplate ctx
                 >>= loadAndApplyTemplate "templates/default.html" ctx
 
+    match "media.css" $ compile getResourceBody
     match "media.md" $ do
         route (setExtension ".html")
         compile $ do
             let ctx = copyrightContext <> defaultContext
+                    <> field "extrastyle" (const $ loadBody "media.css")
             pandocMediaListCompiler
                 >>= loadAndApplyTemplate "templates/default.html" ctx
 
