@@ -101,6 +101,7 @@ hakyllRules = do
         route idRoute
         compile $ do
             let ctx = field "youtube" (const $ loadBody "media/youtube.md")
+                    <> field "soundcloud" (const $ loadBody "media/soundcloud.md")
                     <> copyrightContext <> defaultContext
             getResourceBody
                 >>= applyAsTemplate ctx
@@ -243,8 +244,25 @@ formatInlineMetadata orig@(CodeBlock attr jsonMeta)
 formatInlineMetadata orig = return orig
 
 
-formatYoutubeFromMeta :: (T.Text, T.Text, [Block]) -> T.Text -> Compiler (Item String)
-formatYoutubeFromMeta (ytid, name, descr) jsonMeta = do
+extractIntOrFail :: T.Text -> Aes.Object -> Compiler Int
+extractIntOrFail key obj = case HMS.lookup key obj of
+    Just (Aes.Number x) -> case toBoundedInteger x of
+        Nothing -> fail "Expected int in JSON, got something else"
+        Just y -> return y
+    _ -> fail $ "No numeric key " ++ T.unpack key ++ " in JSON meta"
+
+
+extractStringOrFail :: T.Text -> Aes.Object -> Compiler String
+extractStringOrFail key obj = case HMS.lookup key obj of
+        Just (Aes.String x) -> return (T.unpack x)
+        _ -> fail $ "No string key " ++ T.unpack key ++ " in JSON meta"
+
+
+data Embedded = Embedded T.Text T.Text [Block] String
+            
+
+formatYoutubeFromMeta :: Embedded -> T.Text -> Compiler (Item String)
+formatYoutubeFromMeta (Embedded ytid name descr captionStyle) jsonMeta = do
         rawObj <- grabJsonObj jsonMeta
         width <- extractIntOrFail "width" rawObj
         height <- extractIntOrFail "height" rawObj
@@ -265,6 +283,7 @@ formatYoutubeFromMeta (ytid, name, descr) jsonMeta = do
                        then id
                        else HMS.insert "description" (Aes.String descrText)
         let newObj = nameIns $ descrIns
+                   $ HMS.insert "url" (Aes.String videoUrl)
                    $ HMS.insert "embedUrl" (Aes.String embedUrl)
                    $ HMS.insert "thumbnailUrl" (Aes.String thumbnailUrl)
                    $ HMS.insert "contentUrl" (Aes.String contentUrl) rawObj
@@ -273,50 +292,97 @@ formatYoutubeFromMeta (ytid, name, descr) jsonMeta = do
                 <> constField "video-url" (T.unpack videoUrl)
                 <> constField "youtube-meta" (jsonString newObj)
                 <> constField "caption" (itemBody $ writePandoc $ Item "" descrPandoc)
+                <> constField "caption-style" captionStyle
                 <> constField "title" title
         makeItem ("" :: String) >>= loadAndApplyTemplate templateName ctx
     where templateName = "templates/youtube-embed.html"
-          extractIntOrFail :: T.Text -> Aes.Object -> Compiler Int
-          extractIntOrFail key obj = do
-            case HMS.lookup key obj of
-                Just (Aes.Number x) -> case toBoundedInteger x of
-                    Nothing -> fail "Expected int in JSON, got something else"
-                    Just y -> return y
-                _ -> fail $ "No numeric key " ++ T.unpack key ++ " in YouTube meta"
-          extractStringOrFail key obj = do
-            case HMS.lookup key obj of
-                Just (Aes.String x) -> return (T.unpack x)
-                _ -> fail $ "No string key " ++ T.unpack key ++ " in YouTube meta"
 
 
 embedYoutubeMediaItems :: Block -> Compiler Block
-embedYoutubeMediaItems orig@(Div (_, classes, _) kids)
+embedYoutubeMediaItems orig@(Div (elId, classes, _) kids)
     | not ("youtube" `elem` classes) = return orig
     | otherwise = case kids of
-            (h@(Header _ _ nameInl):Div _ descr:CodeBlock attr jsonMeta:[]) -> do
+            (Para nameInl:CodeBlock attr jsonMeta:descr) -> do
                 let name = stringify nameInl
                 ytid <- extractPandocAttr "ytid" kvals
-                ytEmbedItem <- formatYoutubeFromMeta (ytid, name, descr) jsonMeta
+                let emb = Embedded ytid name descr "is-6"
+                ytEmbedItem <- formatYoutubeFromMeta emb jsonMeta
                 let ytContent = RawBlock "html" $ T.pack $ itemBody ytEmbedItem
+                let h = Header 2 (elId, ["subtitle", "is-3"], []) nameInl
                 return $ Div ("", [], []) [h, ytContent]
                 where (_, _, kvals) = attr
             _ -> return orig
 
 embedYoutubeMediaItems orig = return orig
 
-
 embedYoutubeVideos :: Block -> Compiler Block
 embedYoutubeVideos orig@(CodeBlock attr jsonMeta)
     | not ("youtube" `elem` classes) = return orig
     | otherwise = do
         ytid <- extractPandocAttr "ytid" kvals
-        ytEmbedItem <- formatYoutubeFromMeta (ytid, "", []) jsonMeta
+        let emb = Embedded ytid "" [] "is-6 has-text-centered"
+        ytEmbedItem <- formatYoutubeFromMeta emb jsonMeta
         let ytContent = RawBlock "html" $ T.pack $ itemBody ytEmbedItem
         return $ Div (elId, classes, []) [ytContent]
     where (elId, classes, kvals) = attr
 
-
 embedYoutubeVideos orig = return orig
+
+
+scPlayerUrl :: T.Text
+scPlayerUrl = "https://w.soundcloud.com/player/?url="
+
+scApiUrl :: T.Text -> T.Text
+scApiUrl trackId = scPlayerUrl <> "https%3A//api.soundcloud.com/tracks/" <> trackId 
+                 <> "&amp;color=ff5500&amp;auto_play=false&amp;hide_related=false"
+                 <> "&amp;show_comments=true&amp;show_user=true&amp;show_reposts=false"
+
+
+formatSoundcloudFromMeta :: Embedded -> T.Text -> Compiler (Item String)
+formatSoundcloudFromMeta (Embedded trackId name descr captionStyle) jsonMeta = do
+        rawObj <- grabJsonObj jsonMeta
+        title <- extractStringOrFail "name" rawObj
+        url <- extractStringOrFail "url" rawObj
+        let embedUrl = scApiUrl trackId
+        -- only override name/description if actually provided
+        let nameIns = if T.null name
+                      then id
+                      else HMS.insert "name" (Aes.String name)
+        let descrPandoc = Pandoc (Meta mempty) descr
+        descrText <- case runPure (writeMarkdown defaultHakyllWriterOptions descrPandoc) of
+            Right x -> return x
+            Left _ -> fail "Failed to compile description to markdown"
+        let descrIns = if null descr 
+                       then id
+                       else HMS.insert "description" (Aes.String descrText)
+        let newObj = nameIns $ descrIns
+                   $ HMS.insert "embedUrl" (Aes.String embedUrl) rawObj
+        let ctx = constField "embed-url" (T.unpack embedUrl)
+                <> constField "soundcloud-url" url
+                <> constField "soundcloud-meta" (jsonString newObj)
+                <> constField "caption-style" captionStyle
+                <> constField "caption" (itemBody $ writePandoc $ Item "" descrPandoc)
+                <> constField "title" title
+        makeItem ("" :: String) >>= loadAndApplyTemplate templateName ctx
+    where templateName = "templates/soundcloud-embed.html"
+
+
+embedSoundcloudMediaItems :: Block -> Compiler Block
+embedSoundcloudMediaItems orig@(Div (elId, classes, _) kids)
+    | not ("soundcloud" `elem` classes) = return orig
+    | otherwise = case kids of
+            (Para nameInl:CodeBlock attr jsonMeta:descr) -> do
+                let name = stringify nameInl
+                trackId <- extractPandocAttr "trackId" kvals
+                let emb = Embedded trackId name descr "is-6"
+                scEmbedItem <- formatSoundcloudFromMeta emb jsonMeta
+                let scContent = RawBlock "html" $ T.pack $ itemBody scEmbedItem
+                let h = Header 2 (elId, ["subtitle", "is-3"], []) nameInl
+                return $ Div ("", [], []) [h, scContent]
+                where (_, _, kvals) = attr
+            _ -> return orig
+
+embedSoundcloudMediaItems orig = return orig
 
 
 extractPandocAttr :: T.Text -> [(T.Text, T.Text)] -> Compiler T.Text
@@ -335,6 +401,6 @@ pandocBlogPostCompiler = getResourceBody >>= readPandoc >>= processPandoc
 
 pandocMediaListCompiler :: Compiler (Item String)
 pandocMediaListCompiler = getResourceBody >>= readPandoc >>= processPandoc
-    where transform = walkPandocM $ return . shiftAndStyleHeadings 1 
-                        >=> embedYoutubeMediaItems >=> formatInlineMetadata
+    where transform = walkPandocM $ embedYoutubeMediaItems 
+                        >=> embedSoundcloudMediaItems >=> formatInlineMetadata
           processPandoc = withItemBody transform >=> return . writePandoc

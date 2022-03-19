@@ -1,16 +1,7 @@
-::: {.youtube}
+::: {#les-7-crimes-de-lamour-g-aperghis-g .youtube}
 
-## Les 7 crimes de l’amour  / G. Aperghis   七つの愛の大罪 / G. アペルギス {#les-7-crimes-de-lamour-g-aperghis-g}
+Les 7 crimes de l’amour  / G. Aperghis   七つの愛の大罪 / G. アペルギス
 
-
-::: description
-アペルギス《７つの愛の罪》（1979）<br/>
-Aperghis / Les 7 crimes de l’amour
-
-- Soprano：薬師寺典子　Noriko Yakushiji
-- Clarinet：西村薫　Kaoru Nishimura
-- Percussion：會田瑞樹　Mizuki Aita
-:::
 
 ```{ytid=fyNThTgLDxk}
 {
@@ -38,4 +29,13 @@ Aperghis / Les 7 crimes de l’amour
   ]
 }
 ```
+
+アペルギス《７つの愛の罪》（1979）
+
+Aperghis / Les 7 crimes de l’amour
+
+- Soprano：薬師寺典子　Noriko Yakushiji
+- Clarinet：西村薫　Kaoru Nishimura
+- Percussion：會田瑞樹　Mizuki Aita
+
 :::
