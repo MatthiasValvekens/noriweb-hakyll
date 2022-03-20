@@ -1,0 +1,6 @@
+#content-wrapper figcaption {
+    border-style: none none none solid;
+    border-color: #333;
+    padding-left: 1ex;
+    color: #888;
+}

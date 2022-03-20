@@ -5,7 +5,6 @@ import Hakyll
 
 import Text.Pandoc.Definition
 import Text.Pandoc.Walk (walkPandocM)
-import Text.Pandoc.Shared (stringify)
 import Text.Pandoc (writeMarkdown, runPure)
 
 import qualified Data.Text as T
@@ -80,7 +79,8 @@ hakyllRules = do
         route idRoute
         compile $ do
             posts <- recentFirst =<< loadAll ("blog/**/*.md" .&&. hasNoVersion)
-            specialPages <- loadAll (fromList ["profile.html", "contact.html", "blog.html", "media.md"])
+            let spIdents = ["profile.html", "contact.html", "blog.html", "media.html"]
+            specialPages <- loadAll (fromList spIdents)
             let pages = specialPages ++ posts
             let rootCtx = constField "rootUrl" rootUrl
             let pgCtx = listField "pages" (rootCtx <> defaultContext) (return pages)
@@ -105,13 +105,16 @@ hakyllRules = do
                 >>= loadAndApplyTemplate "templates/post-list.html" ctx
                 >>= loadAndApplyTemplate "templates/default.html" ctx
 
-    match "media.css" $ compile getResourceBody
-    match "media.md" $ do
-        route (setExtension ".html")
+    match "media/media.css" $ compile getResourceBody
+    match "media.html" $ do
+        route idRoute
         compile $ do
+            mediaItems <- recentFirst =<< loadAll "media/**/*.md"
             let ctx = copyrightContext <> defaultContext
-                    <> field "extrastyle" (const $ loadBody "media.css")
-            pandocMediaListCompiler
+                    <> listField "media-items" defaultContext (return mediaItems)
+                    <> field "extrastyle" (const $ loadBody "media/media.css")
+            getResourceBody 
+                >>= applyAsTemplate ctx
                 >>= loadAndApplyTemplate "templates/default.html" ctx
 
     match "blog/**/*.md" $ do
@@ -133,6 +136,8 @@ hakyllRules = do
     match "templates/**" $ compile templateBodyCompiler
     match "snippets/**" $ compile getResourceBody
     match "profile/**" $ compile getResourceBody
+    match "media/soundcloud/*.md" $ compile compileSoundcloudMedia
+    match "media/youtube/*.md" $ compile compileYoutubeMedia
         
 
     where forBaseVer = setVersion Nothing . itemIdentifier
@@ -189,7 +194,6 @@ postCtx = dateField "date" "%F"
              <> fieldFromItemMeta "lang"
              <> copyrightContext
              <> defaultContext
-
 
 mainAuthor :: String
 mainAuthor = "Noriko Yakushiji"
@@ -325,7 +329,7 @@ extractStringOrFail key obj = case HMS.lookup key obj of
         _ -> fail $ "No string key " ++ T.unpack key ++ " in JSON meta"
 
 
-data Embedded = Embedded T.Text T.Text [Block] String
+data Embedded = Embedded T.Text T.Text [Block] String (Maybe T.Text)
             
 descrTextM :: MonadFail m => [Block] -> T.Text -> m T.Text
 descrTextM descr title = case descr of
@@ -341,7 +345,7 @@ descrAsHtml descr = itemBody $ writePandoc $ Item "" descrPandoc
 
 
 formatYoutubeFromMeta :: Embedded -> T.Text -> Compiler (Item String)
-formatYoutubeFromMeta (Embedded ytid name descr captionStyle) jsonMeta = do
+formatYoutubeFromMeta (Embedded ytid name descr captionStyle mbUploadDate) jsonMeta = do
         rawObj <- grabJsonObj jsonMeta
         width <- extractIntOrFail "width" rawObj
         height <- extractIntOrFail "height" rawObj
@@ -356,8 +360,12 @@ formatYoutubeFromMeta (Embedded ytid name descr captionStyle) jsonMeta = do
         let nameIns = if T.null name
                       then id
                       else HMS.insert "name" (Aes.String name)
+        let uplDateInsert = case mbUploadDate of
+                Nothing -> id
+                Just dt -> HMS.insert "uploadDate" (Aes.String dt)
         descrText <- descrTextM descr (T.pack title)
-        let newObj = nameIns $ HMS.insert "description" (Aes.String descrText)
+        let newObj = nameIns $ uplDateInsert
+                   $ HMS.insert "description" (Aes.String descrText)
                    $ HMS.insert "name" (Aes.String $ T.pack title)
                    $ HMS.insert "url" (Aes.String videoUrl)
                    $ HMS.insert "embedUrl" (Aes.String embedUrl)
@@ -374,29 +382,25 @@ formatYoutubeFromMeta (Embedded ytid name descr captionStyle) jsonMeta = do
     where templateName = "templates/youtube-embed.html"
 
 
-embedYoutubeMediaItems :: Block -> Compiler Block
-embedYoutubeMediaItems orig@(Div (elId, classes, _) kids)
-    | not ("youtube" `elem` classes) = return orig
-    | otherwise = case kids of
-            (Para nameInl:CodeBlock attr jsonMeta:descr) -> do
-                let name = stringify nameInl
+compileYoutubeMedia :: Compiler (Item String)
+compileYoutubeMedia = do
+        ident <- getUnderlying
+        pubDate <- T.pack <$> getStringFromMeta "published" ident
+        name <- T.pack <$> getStringFromMeta "title" ident
+        pandocItem <- getResourceBody >>= readPandoc
+        case itemBody pandocItem of
+            (Pandoc _ (CodeBlock (_, _, kvals) jsonMeta:descr)) -> do
                 ytid <- extractPandocAttr "ytid" kvals
-                let emb = Embedded ytid name descr "is-6"
-                ytEmbedItem <- formatYoutubeFromMeta emb jsonMeta
-                let ytContent = RawBlock "html" $ T.pack $ itemBody ytEmbedItem
-                let h = Header 2 (elId, ["subtitle", "is-3"], []) nameInl
-                return $ Div ("", [], []) [h, ytContent]
-                where (_, _, kvals) = attr
-            _ -> return orig
-
-embedYoutubeMediaItems orig = return orig
+                let emb = Embedded ytid name descr "is-6" (Just pubDate)
+                formatYoutubeFromMeta emb jsonMeta
+            _ -> fail $ "YouTube resource " <> show ident <> " does not have expected structure"
 
 embedYoutubeVideos :: Block -> Compiler Block
 embedYoutubeVideos orig@(CodeBlock attr jsonMeta)
     | not ("youtube" `elem` classes) = return orig
     | otherwise = do
         ytid <- extractPandocAttr "ytid" kvals
-        let emb = Embedded ytid "" [] "is-6 has-text-centered"
+        let emb = Embedded ytid "" [] "is-6 has-text-centered" Nothing
         ytEmbedItem <- formatYoutubeFromMeta emb jsonMeta
         let ytContent = RawBlock "html" $ T.pack $ itemBody ytEmbedItem
         return $ Div (elId, classes, []) [ytContent]
@@ -415,7 +419,7 @@ scApiUrl trackId = scPlayerUrl <> "https%3A//api.soundcloud.com/tracks/" <> trac
 
 
 formatSoundcloudFromMeta :: Embedded -> T.Text -> Compiler (Item String)
-formatSoundcloudFromMeta (Embedded trackId name descr captionStyle) jsonMeta = do
+formatSoundcloudFromMeta (Embedded trackId name descr captionStyle mbUploadDate) jsonMeta = do
         rawObj <- grabJsonObj jsonMeta
         title <- if T.null name
                  then extractStringOrFail "name" rawObj
@@ -426,8 +430,12 @@ formatSoundcloudFromMeta (Embedded trackId name descr captionStyle) jsonMeta = d
         let nameIns = if T.null name
                       then id
                       else HMS.insert "name" (Aes.String name)
+        let uplDateInsert = case mbUploadDate of
+                Nothing -> id
+                Just dt -> HMS.insert "uploadDate" (Aes.String dt)
         descrText <- descrTextM descr (T.pack title)
-        let newObj = nameIns $ HMS.insert "description" (Aes.String descrText)
+        let newObj = nameIns $ uplDateInsert
+                   $ HMS.insert "description" (Aes.String descrText)
                    $ HMS.insert "embedUrl" (Aes.String embedUrl) rawObj
         let ctx = constField "embed-url" (T.unpack embedUrl)
                 <> constField "soundcloud-url" url
@@ -439,22 +447,18 @@ formatSoundcloudFromMeta (Embedded trackId name descr captionStyle) jsonMeta = d
     where templateName = "templates/soundcloud-embed.html"
 
 
-embedSoundcloudMediaItems :: Block -> Compiler Block
-embedSoundcloudMediaItems orig@(Div (elId, classes, _) kids)
-    | not ("soundcloud" `elem` classes) = return orig
-    | otherwise = case kids of
-            (Para nameInl:CodeBlock attr jsonMeta:descr) -> do
-                let name = stringify nameInl
+compileSoundcloudMedia :: Compiler (Item String)
+compileSoundcloudMedia = do
+        ident <- getUnderlying
+        pubDate <- T.pack <$> getStringFromMeta "published" ident
+        name <- T.pack <$> getStringFromMeta "title" ident
+        pandocItem <- getResourceBody >>= readPandoc
+        case itemBody pandocItem of
+            (Pandoc _ (CodeBlock (_, _, kvals) jsonMeta:descr)) -> do
                 trackId <- extractPandocAttr "trackId" kvals
-                let emb = Embedded trackId name descr "is-6"
-                scEmbedItem <- formatSoundcloudFromMeta emb jsonMeta
-                let scContent = RawBlock "html" $ T.pack $ itemBody scEmbedItem
-                let h = Header 2 (elId, ["subtitle", "is-3"], []) nameInl
-                return $ Div ("", [], []) [h, scContent]
-                where (_, _, kvals) = attr
-            _ -> return orig
-
-embedSoundcloudMediaItems orig = return orig
+                let emb = Embedded trackId name descr "is-6" (Just pubDate)
+                formatSoundcloudFromMeta emb jsonMeta
+            _ -> fail $ "SoundCloud resource " <> show ident <> " does not have expected structure"
 
 
 extractPandocAttr :: T.Text -> [(T.Text, T.Text)] -> Compiler T.Text
@@ -468,13 +472,6 @@ pandocBlogPostCompiler :: Compiler (Item String)
 pandocBlogPostCompiler = getResourceBody >>= readPandoc >>= processPandoc
     where transform = walkPandocM $ return . shiftAndStyleHeadings 1 
                         >=> embedYoutubeVideos >=> formatInlineMetadata
-          processPandoc = withItemBody transform >=> return . writePandoc
-
-
-pandocMediaListCompiler :: Compiler (Item String)
-pandocMediaListCompiler = getResourceBody >>= readPandoc >>= processPandoc
-    where transform = walkPandocM $ embedYoutubeMediaItems 
-                        >=> embedSoundcloudMediaItems >=> formatInlineMetadata
           processPandoc = withItemBody transform >=> return . writePandoc
 
 
