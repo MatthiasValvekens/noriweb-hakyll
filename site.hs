@@ -96,7 +96,8 @@ hakyllRules = do
         compile $ do
             posts <- recentFirst =<< loadAll pattern
             let postInListCtx = postCtx <> field "preview" getPreview
-            let ctx = listField "posts" postInListCtx (return posts)
+            let ctx = constField "title" "Blog"
+                    <> listField "posts" postInListCtx (return posts)
                     <> radialPaginationContext 2 blogPagination page
                     <> copyrightContext
                     <> defaultContext
