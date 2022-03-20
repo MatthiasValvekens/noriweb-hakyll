@@ -2,7 +2,7 @@
 title: Media
 ---
 
-# Media {.title .is-1}
+# Media {.title .is-1 .has-text-centered}
 
 ::: {#les-7-crimes-de-lamour-g-aperghis-g .youtube}
 
