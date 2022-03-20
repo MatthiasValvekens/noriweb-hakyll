@@ -115,10 +115,12 @@ hakyllRules = do
         route idRoute
         compile $ do
             mediaItems <- recentFirst =<< loadAll pattern
-            let ctx = copyrightContext <> defaultContext
+            let ctx = constField "title" "Media"
                     <> listField "media-items" defaultContext (return mediaItems)
                     <> radialPaginationContext 2 mediaPagination page
                     <> field "extrastyle" (const $ loadBody "media/media.css")
+                    <> copyrightContext
+                    <> defaultContext
             makeItem ("" :: String)
                 >>= loadAndApplyTemplate "templates/media-list.html" ctx
                 >>= loadAndApplyTemplate "templates/default.html" ctx
