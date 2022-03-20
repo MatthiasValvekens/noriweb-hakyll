@@ -197,10 +197,13 @@ getItemAuthor :: Item a -> Compiler (Maybe String)
 getItemAuthor item = getMetadata (itemIdentifier item)
         >>= return . lookupString "author"
 
+getItemAuthorUrl :: Item a -> Compiler (Maybe String)
+getItemAuthorUrl item = getMetadata (itemIdentifier item)
+        >>= return . lookupString "author-url"
 
 copyrightContext :: Context String
 copyrightContext = field "author" (fmap checkAuthor . getItemAuthor)
-        <> fieldFromItemMeta "author-url"
+        <> field "author-url" (getItemAuthorUrl >=> checkAuthorUrl)
         <> field "copyrightline" (fmap cline . getItemAuthor)
     where cline Nothing = mainAuthor
           cline (Just author)
@@ -208,6 +211,12 @@ copyrightContext = field "author" (fmap checkAuthor . getItemAuthor)
             | otherwise = author <> ", " <> mainAuthor
           checkAuthor Nothing = mainAuthor
           checkAuthor (Just author) = author
+          checkAuthorUrl Nothing = do
+            maybeRoute <- getRoute "profile.html"
+            case maybeRoute of
+                Nothing -> fail "no main author URL"
+                Just rt -> return (rootUrl <> toUrl rt)
+          checkAuthorUrl (Just authorUrl) = return authorUrl
 
 
 data PageNumInfo = PageNumInfo 

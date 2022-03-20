@@ -2,7 +2,7 @@
     "@context": "https://schema.org/",
     "@id": "$abs-url$#article",
     "@type": "Article",
-    "url": "$url$",
+    "url": "$abs-url$",
     "name": "$title$",
     $if(part-title)$
     "headline": "$part-title$",
