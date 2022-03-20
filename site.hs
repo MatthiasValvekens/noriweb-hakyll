@@ -105,17 +105,23 @@ hakyllRules = do
                 >>= loadAndApplyTemplate "templates/post-list.html" ctx
                 >>= loadAndApplyTemplate "templates/default.html" ctx
 
-    match "media/media.css" $ compile getResourceBody
-    match "media.html" $ do
+    mediaPagination <- do
+        let grp = liftM (paginateEvery 3) . sortRecentFirst
+        buildPaginateWith grp ("media/**/*.md") mediaPageId
+
+    paginateRules mediaPagination $ \page pattern -> do
         route idRoute
         compile $ do
-            mediaItems <- recentFirst =<< loadAll "media/**/*.md"
+            mediaItems <- recentFirst =<< loadAll pattern
             let ctx = copyrightContext <> defaultContext
                     <> listField "media-items" defaultContext (return mediaItems)
+                    <> radialPaginationContext 2 mediaPagination page
                     <> field "extrastyle" (const $ loadBody "media/media.css")
-            getResourceBody 
-                >>= applyAsTemplate ctx
+            makeItem ("" :: String)
+                >>= loadAndApplyTemplate "templates/media-list.html" ctx
                 >>= loadAndApplyTemplate "templates/default.html" ctx
+
+    match "media/media.css" $ compile getResourceBody
 
     match "blog/**/*.md" $ do
         route $ gsubRoute "^blog/[0-9]+/" (const "blog/post/") `composeRoutes` setExtension ".html"
@@ -150,6 +156,10 @@ hakyllRules = do
           blogPageId :: PageNumber -> Identifier
           blogPageId 1 = "blog.html"
           blogPageId n = fromFilePath $ "blog/pagelist/" ++ show n ++ ".html"
+
+          mediaPageId :: PageNumber -> Identifier
+          mediaPageId 1 = "media.html"
+          mediaPageId n = fromFilePath $ "media/pagelist/" ++ show n ++ ".html"
 
           getPreview = loadBody . setVersion (Just "preview") . itemIdentifier
 
