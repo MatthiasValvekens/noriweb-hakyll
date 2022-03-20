@@ -1,0 +1,38 @@
+<section class="section">
+    <nav class="pagination is-small is-centered" role="navigation" aria-label="pagination">
+        $if(previousPageNum)$
+        <a class="pagination-previous" aria-label="Newer" href="$previousPageUrl$">&lt;</a>
+        $else$
+        <a class="pagination-previous is-disabled" aria-hidden="true">&lt;</a>
+        $endif$
+
+        $if(nextPageNum)$
+        <a class="pagination-next" aria-label="Older" href="$nextPageUrl$">&gt;</a>
+        $else$
+        <a class="pagination-next is-disabled" aria-hidden="true">&gt;</a>
+        $endif$
+
+        <ul class="pagination-list">
+            $if(firstPageNum)$
+            <li><a class="pagination-link" aria-label="Goto page $firstPageNum$" href="$firstPageUrl$">$firstPageNum$</a></li>
+            $endif$
+            $if(pagesBefore)$
+            $if(elideBefore)$ <li><span class="pagination-ellipsis">&hellip;</span></li> $endif$
+            $for(pagesBefore)$
+                <li><a class="pagination-link" aria-label="Goto page $pageNum$" href="$pageUrl$">$pageNum$</a></li>
+            $endfor$
+            $endif$
+            <li><a class="pagination-link is-current" aria-label="Page $currentPageNum$" aria-current="page">$currentPageNum$</a></li>
+
+            $if(pagesAfter)$
+            $for(pagesAfter)$
+                <li><a class="pagination-link" aria-label="Goto page $pageNum$" href="$pageUrl$">$pageNum$</a></li>
+            $endfor$
+            $if(elideAfter)$ <li><span class="pagination-ellipsis">&hellip;</span></li> $endif$
+            $endif$
+
+            $if(lastPageNum)$
+            <li><a class="pagination-link" aria-label="Goto page $lastPageNum$" href="$lastPageUrl$">$lastPageNum$</a></li>
+            $endif$
+        </ul>
+    </nav>
