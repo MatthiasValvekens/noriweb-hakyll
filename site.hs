@@ -81,7 +81,9 @@ hakyllRules = do
             posts <- recentFirst =<< loadAll ("blog/**/*.md" .&&. hasNoVersion)
             let spIdents = ["profile.html", "contact.html", "blog.html", "media.html"]
             specialPages <- loadAll (fromList spIdents)
-            let pages = specialPages ++ posts
+            -- load page/media list pages as well
+            indexes <- loadAll "**/pagelist/**"
+            let pages = specialPages ++ indexes ++ posts
             let rootCtx = constField "rootUrl" rootUrl
             let pgCtx = listField "pages" (rootCtx <> defaultContext) (return pages)
             makeItem ("" :: String)
