@@ -1,15 +1,15 @@
 <section class="section">
     <nav class="pagination is-small is-centered" role="navigation" aria-label="pagination">
-        $if(previousPageNum)$
+        $if(previousPageUrl)$
         <a class="pagination-previous" aria-label="Newer" href="$previousPageUrl$">&lt;</a>
         $else$
-        <a class="pagination-previous is-disabled" aria-hidden="true">&lt;</a>
+        <a class="pagination-previous is-disabled" aria-hidden="true" disabled>&lt;</a>
         $endif$
 
-        $if(nextPageNum)$
+        $if(nextPageUrl)$
         <a class="pagination-next" aria-label="Older" href="$nextPageUrl$">&gt;</a>
         $else$
-        <a class="pagination-next is-disabled" aria-hidden="true">&gt;</a>
+        <a class="pagination-next is-disabled" aria-hidden="true" disabled>&gt;</a>
         $endif$
 
         <ul class="pagination-list">
