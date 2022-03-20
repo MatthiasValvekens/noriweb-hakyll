@@ -61,7 +61,7 @@ hakyllRules = do
         compile $ getResourceBody >>= applyAsTemplate ctx 
                   >>= loadAndApplyTemplate "templates/default.html" ctx
 
-    create ["profile.html"] $ do
+    match "profile.html" $ do
         route idRoute 
         compile $ do 
             let aboutCtx = constField "title" "Bio"
@@ -70,8 +70,8 @@ hakyllRules = do
                     <> profileForLang "ja"
                     <> copyrightContext
                     <> defaultContext
-            makeItem ("" :: String) 
-                >>= loadAndApplyTemplate "templates/profile.html" aboutCtx
+            getResourceBody
+                >>= applyAsTemplate aboutCtx
                 >>= loadAndApplyTemplate "templates/default.html" aboutCtx
 
     -- Loosely based on https://robertwpearce.com/hakyll-pt-2-generating-a-sitemap-xml-file.html
