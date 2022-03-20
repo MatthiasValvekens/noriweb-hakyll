@@ -317,6 +317,18 @@ extractStringOrFail key obj = case HMS.lookup key obj of
 
 data Embedded = Embedded T.Text T.Text [Block] String
             
+descrTextM :: MonadFail m => [Block] -> T.Text -> m T.Text
+descrTextM descr title = case descr of
+      [] -> return title
+      _ -> case runPure (writeMarkdown defaultHakyllWriterOptions descrPandoc) of
+          Right x -> return x 
+          Left _ -> fail "Failed to compile description to markdown"
+    where descrPandoc = Pandoc (Meta mempty) descr
+
+descrAsHtml :: [Block] -> String
+descrAsHtml descr = itemBody $ writePandoc $ Item "" descrPandoc
+    where descrPandoc = Pandoc (Meta mempty) descr
+
 
 formatYoutubeFromMeta :: Embedded -> T.Text -> Compiler (Item String)
 formatYoutubeFromMeta (Embedded ytid name descr captionStyle) jsonMeta = do
@@ -334,14 +346,8 @@ formatYoutubeFromMeta (Embedded ytid name descr captionStyle) jsonMeta = do
         let nameIns = if T.null name
                       then id
                       else HMS.insert "name" (Aes.String name)
-        let descrPandoc = Pandoc (Meta mempty) descr
-        descrText <- case runPure (writeMarkdown defaultHakyllWriterOptions descrPandoc) of
-            Right x -> return x
-            Left _ -> fail "Failed to compile description to markdown"
-        let descrIns = if null descr 
-                       then id
-                       else HMS.insert "description" (Aes.String descrText)
-        let newObj = nameIns $ descrIns
+        descrText <- descrTextM descr (T.pack title)
+        let newObj = nameIns $ HMS.insert "description" (Aes.String descrText)
                    $ HMS.insert "name" (Aes.String $ T.pack title)
                    $ HMS.insert "url" (Aes.String videoUrl)
                    $ HMS.insert "embedUrl" (Aes.String embedUrl)
@@ -351,7 +357,7 @@ formatYoutubeFromMeta (Embedded ytid name descr captionStyle) jsonMeta = do
                 <> constField "embed-url" (T.unpack embedUrl)
                 <> constField "video-url" (T.unpack videoUrl)
                 <> constField "youtube-meta" (jsonString newObj)
-                <> constField "caption" (itemBody $ writePandoc $ Item "" descrPandoc)
+                <> constField "caption" (descrAsHtml descr)
                 <> constField "caption-style" captionStyle
                 <> constField "title" title
         makeItem ("" :: String) >>= loadAndApplyTemplate templateName ctx
@@ -410,20 +416,14 @@ formatSoundcloudFromMeta (Embedded trackId name descr captionStyle) jsonMeta = d
         let nameIns = if T.null name
                       then id
                       else HMS.insert "name" (Aes.String name)
-        let descrPandoc = Pandoc (Meta mempty) descr
-        descrText <- case runPure (writeMarkdown defaultHakyllWriterOptions descrPandoc) of
-            Right x -> return x
-            Left _ -> fail "Failed to compile description to markdown"
-        let descrIns = if null descr 
-                       then id
-                       else HMS.insert "description" (Aes.String descrText)
-        let newObj = nameIns $ descrIns
+        descrText <- descrTextM descr (T.pack title)
+        let newObj = nameIns $ HMS.insert "description" (Aes.String descrText)
                    $ HMS.insert "embedUrl" (Aes.String embedUrl) rawObj
         let ctx = constField "embed-url" (T.unpack embedUrl)
                 <> constField "soundcloud-url" url
                 <> constField "soundcloud-meta" (jsonString newObj)
                 <> constField "caption-style" captionStyle
-                <> constField "caption" (itemBody $ writePandoc $ Item "" descrPandoc)
+                <> constField "caption" (descrAsHtml descr)
                 <> constField "title" title
         makeItem ("" :: String) >>= loadAndApplyTemplate templateName ctx
     where templateName = "templates/soundcloud-embed.html"
