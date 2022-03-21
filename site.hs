@@ -141,6 +141,15 @@ hakyllRules = do
         compile $ makeItem ("" :: String)
             >>= loadAndApplyTemplate "templates/jsonld/article-info.json" ctx
 
+    match "repertoire.md" $ do
+        route (setExtension ".html")
+        compile $ do
+            let ctx = field "extrastyle" (const $ loadBody "snippets/repertoire.css")
+                    <> copyrightContext <> defaultContext
+            genericPageCompiler 
+                >>= loadAndApplyTemplate "templates/generic.html" ctx
+                >>= loadAndApplyTemplate "templates/default.html" ctx
+
     match "blog/**/*.md" $ version "preview" $ compile (pandocPreviewCompiler)
 
     match "templates/**" $ compile templateBodyCompiler
@@ -148,7 +157,6 @@ hakyllRules = do
     match "profile/**" $ compile getResourceBody
     match "media/soundcloud/*.md" $ compile compileSoundcloudMedia
     match "media/youtube/*.md" $ compile compileYoutubeMedia
-        
 
     where forBaseVer = setVersion Nothing . itemIdentifier
           profileForLang :: String -> Context String
@@ -282,7 +290,6 @@ radialPaginationContext rad p curPage = paginateContext p curPage
 
 -------------------------------------------------
 -- Pandoc stuff for blog posts
-
 
 
 shiftAndStyleHeadings :: Int -> Block -> Block
@@ -491,3 +498,26 @@ pandocPreviewCompiler = getResourceBody >>= readPandoc >>= render
           reduceToFirstPara' (x:xs) = case x of
             Para inl -> return (Pandoc (Meta mempty) [Plain inl])
             _ -> reduceToFirstPara' xs
+
+
+flagJapaneseText :: Inline -> Inline
+flagJapaneseText inl = case inl of
+    Span (elId, cls, kvals) inls -> Span (elId, cls, ("lang", "ja"):kvals) inls
+    _ -> inl
+
+
+defaultColWidths :: Block -> Block
+defaultColWidths (Table attr caption colSpec thead tbody tfoot)
+        = Table attr caption colSpec' thead tbody tfoot
+    where colSpec' = [(fst x, ColWidthDefault) | x <- colSpec]
+
+defaultColWidths orig = orig
+
+genericPageCompiler :: Compiler (Item String)
+genericPageCompiler = getResourceBody >>= readPandoc >>= processPandoc
+    where transformBlk = walkPandocM $ return . shiftAndStyleHeadings 1 
+                            >=> return . defaultColWidths
+                            >=> embedYoutubeVideos >=> formatInlineMetadata
+          transformInl = walkPandocM $ return . flagJapaneseText 
+          transform = transformBlk >=> transformInl
+          processPandoc = withItemBody transform >=> return . writePandoc

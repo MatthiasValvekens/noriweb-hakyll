@@ -1,0 +1,35 @@
+#article-body td span.jp:before {
+    content: '（';
+}
+
+#article-body td span.jp:after {
+    content: '）';
+}
+
+#article-body td span.jp {
+    color: #888;
+}
+
+#article-body td span.wcr:after {
+    content: ' [WP] ';
+    font-variant: small-caps;
+    color: #851414;
+    font-size: 70%;
+}
+
+#article-body td span.jcr:after {
+    content: ' [JP] ';
+    font-variant: small-caps;
+    color: #851414;
+    font-size: 70%;
+}
+
+#article-body table {
+    margin-bottom: 3rem;
+    border-spacing: 1em;
+    border-collapse: separate;
+}
+
+#article-body td:nth-child(1) {
+    width: 30%;
+}

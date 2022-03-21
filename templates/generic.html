@@ -1,0 +1,19 @@
+<article class="article">
+    $if(article-meta)$
+    <script type="application/ld+json">
+        $article-meta$
+    </script>
+    $endif$
+    <h1 class="title has-text-centered">$title$</h1>
+    $if(description)$
+    <section class="section article-info">
+        <h2 class="is-sr-only">Article info</h2>
+        <p>
+            $description$
+        </p>
+    </section>
+    $endif$
+    <section id="article-body" class="section"$if(lang)$ lang="$lang$"$endif$>
+        $body$
+    </section>
+</article>
