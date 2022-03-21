@@ -8,8 +8,6 @@ published: "2016-12-06"
   "@context": "https://schema.org",
   "@type": "VideoObject",
   "duration": "PT48M24S",
-  "width": 560,
-  "height": 315,
   "actor": [
       {
           "@id": "https://noriko.yakushiji.be/profile.html#me",

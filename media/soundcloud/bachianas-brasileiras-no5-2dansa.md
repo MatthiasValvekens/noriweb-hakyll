@@ -8,9 +8,7 @@ published: "2012-02-23"
   "@context": "https://schema.org",
   "@type": "AudioObject",
   "url": "https://soundcloud.com/noko895/bachianas-brasileiras-no-5-1",
-  "duration": "PT4M45S",  
-  "width": 560,
-  "height": 315
+  "duration": "PT4M45S"
 }
 ```
 

@@ -9,8 +9,6 @@ published: "2017-03-17"
   "@context": "https://schema.org",
   "@type": "VideoObject",
   "duration": "PT3M50S",
-  "width": 560,
-  "height": 315,
   "actor": [
       {
           "@id": "https://noriko.yakushiji.be/profile.html#me",

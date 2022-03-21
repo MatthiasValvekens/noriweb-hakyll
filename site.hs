@@ -19,7 +19,7 @@ import Control.Monad ((>=>), msum, liftM)
 import qualified GHC.IO.Encoding as E
 
 import qualified Data.Aeson as Aes
-import Data.Scientific (toBoundedInteger)
+
 
 --------------------------------------------------------------------------------
 
@@ -329,14 +329,6 @@ formatInlineMetadata orig@(CodeBlock attr jsonMeta)
 formatInlineMetadata orig = return orig
 
 
-extractIntOrFail :: T.Text -> Aes.Object -> Compiler Int
-extractIntOrFail key obj = case HMS.lookup key obj of
-    Just (Aes.Number x) -> case toBoundedInteger x of
-        Nothing -> fail "Expected int in JSON, got something else"
-        Just y -> return y
-    _ -> fail $ "No numeric key " ++ T.unpack key ++ " in JSON meta"
-
-
 extractStringOrFail :: T.Text -> Aes.Object -> Compiler String
 extractStringOrFail key obj = case HMS.lookup key obj of
         Just (Aes.String x) -> return (T.unpack x)
@@ -361,8 +353,8 @@ descrAsHtml descr = itemBody $ writePandoc $ Item "" descrPandoc
 formatYoutubeFromMeta :: Embedded -> T.Text -> Compiler (Item String)
 formatYoutubeFromMeta (Embedded ytid name descr captionStyle mbUploadDate) jsonMeta = do
         rawObj <- grabJsonObj jsonMeta
-        width <- extractIntOrFail "width" rawObj
-        height <- extractIntOrFail "height" rawObj
+        let width = 560
+        let height = 315
         title <- if T.null name
                  then extractStringOrFail "name" rawObj
                  else return (T.unpack name)
@@ -379,6 +371,8 @@ formatYoutubeFromMeta (Embedded ytid name descr captionStyle mbUploadDate) jsonM
                 Just dt -> HMS.insert "uploadDate" (Aes.String dt)
         descrText <- descrTextM descr (T.pack title)
         let newObj = nameIns $ uplDateInsert
+                   $ HMS.insert "width" (Aes.Number width)
+                   $ HMS.insert "height" (Aes.Number height)
                    $ HMS.insert "description" (Aes.String descrText)
                    $ HMS.insert "name" (Aes.String $ T.pack title)
                    $ HMS.insert "url" (Aes.String videoUrl)

@@ -10,8 +10,6 @@ published: "2020-02-09"
   "@context": "https://schema.org",
   "@type": "VideoObject",
   "duration": "PT1M16S",
-  "width": 560,
-  "height": 315,
   "actor": [
       {
           "@id": "https://noriko.yakushiji.be/profile.html#me",

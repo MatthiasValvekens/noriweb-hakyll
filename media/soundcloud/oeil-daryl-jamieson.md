@@ -10,9 +10,7 @@ published:  "2017-03-25"
   "@type": "AudioObject",
   "name": "Oeil",
   "url": "https://soundcloud.com/daryl-jamieson-1/oeil-2008",
-  "duration": "PT6M4S",  
-  "width": 560,
-  "height": 315,
+  "duration": "PT6M4S",
   "author": [
       {
         "@type": "Person",

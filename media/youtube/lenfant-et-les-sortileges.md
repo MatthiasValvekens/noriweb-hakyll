@@ -9,8 +9,6 @@ published: "2013-04-15"
   "@context": "https://schema.org",
   "@type": "VideoObject",
   "duration": "PT44M04S",
-  "width": 560,
-  "height": 315,
   "actor": [
       {
           "@id": "https://noriko.yakushiji.be/profile.html#me",
