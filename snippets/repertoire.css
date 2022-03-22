@@ -1,3 +1,27 @@
+#article-body dl:before {
+    content: "Symbols";
+    font-weight: bold;
+    font-variant: small-caps;
+}
+
+#article-body dl {
+    border-radius: 1em;
+    background-color: #eaeff2;
+    padding: 1em;
+    margin-bottom: 1em;
+    margin-top: 2em;
+    width: 30ch;
+}
+
+#article-body dl dt {
+    font-weight: bold;
+    color: #851414;
+}
+
+#article-body dl dd {
+    margin-left: 1rem;
+}
+
 #article-body td span.jp:before {
     content: '（';
 }
@@ -33,4 +57,15 @@
 
 #article-body td:nth-child(1) {
     width: 30ch;
+}
+
+.toc li {
+    font-size: 130%;
+    margin-left: 1rem;
+}
+
+.toc > .toc-head {
+    font-weight: 400;
+    font-size: 2rem;
+    margin-bottom: 1rem;
 }

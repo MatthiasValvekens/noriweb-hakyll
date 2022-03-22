@@ -2,6 +2,32 @@
 title: "Repertoire"
 ---
 
+<!-- TODO do this in the Pandoc AST -->
+
+::: toc
+
+::: {.toc-head aria-role=heading}
+Table of contents
+:::
+
+- [Solo pieces](#solo-pieces)
+- [Duo pieces](#duo-pieces)
+- [Chamber music](#chamber-music)
+- [Vocal ensemble](#vocal-ensemble)
+- [Opera and music theater](#opera-music-theater)
+- [With electronics](#with-electronics)
+:::
+
+
+
+WP
+
+: World Premiere
+
+JP
+  
+: Japanese Premiere
+
 
 
 # Solo pieces {#solo-pieces}
@@ -247,9 +273,13 @@ title: "Repertoire"
 +-------------------------------+---------------------------------------------+------------------+
 | Widmann, Jörg                 | 7 Abgesange auf eine tote Linde             | Sop, Pf, Vn, Cl  |
 +-------------------------------+---------------------------------------------+------------------+
+| - Couvreur, François          | [Leçons de Ténèbres]{.wcr}                  | Sop, Cl, Vn, Pf  |
+| - Hejdrowski, Stefan          |                                             |                  |
+| - Jacobs, Ellen               |                                             |                  |
++-------------------------------+---------------------------------------------+------------------+
 
 
-# Vocal ensemble
+# Vocal ensemble {#vocal-ensemble}
 
 
 +-------------------------------+---------------------------------------------+
@@ -270,7 +300,7 @@ title: "Repertoire"
 +-------------------------------+---------------------------------------------+
 
 
-# Opera and music theater
+# Opera and music theater {#opera-music-theater}
 
 +-------------------------------+---------------------------------------------+-----------------+
 | Composer                      | Work(s)                                     | Role(s)         |
@@ -293,13 +323,9 @@ title: "Repertoire"
 +-------------------------------+---------------------------------------------+-----------------+
 | Vogtenhuber, Raimund          | [Zwei die schweigen]{.wcr}                  | /               |
 +-------------------------------+---------------------------------------------+-----------------+
-| Couvreur, François            | [Leçons de Ténèbres]{.wcr}                  | Sop, Cl, Vn, Pf |
-| Hejdrowski, Stefan            |                                             |                 |
-| Jacobs, Ellen                 |                                             |                 |
-+-------------------------------+---------------------------------------------+-----------------+
 
 
-# With electronics
+# With electronics {#with-electronics}
 
 +-------------------------------+---------------------------------------------+------------------+
 | Composer                      | Work(s)                                     | Instrumentation  |

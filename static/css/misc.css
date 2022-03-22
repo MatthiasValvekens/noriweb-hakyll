@@ -6,6 +6,10 @@
     align-items: stretch;
 }
 
+#content-wrapper h1, #content-wrapper h2 {
+    padding-top: 3.25rem; /* Compensate for fixed header */
+}
+
 #content-wrapper > main {
     flex-grow: 1;
     padding-bottom: 3rem;
