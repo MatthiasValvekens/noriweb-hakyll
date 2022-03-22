@@ -10,6 +10,7 @@
     color: #888;
 }
 
+
 #article-body td span.wcr:after {
     content: ' [WP] ';
     font-variant: small-caps;
@@ -31,5 +32,5 @@
 }
 
 #article-body td:nth-child(1) {
-    width: 30%;
+    width: 30ch;
 }
