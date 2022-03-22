@@ -79,7 +79,11 @@ hakyllRules = do
         route idRoute
         compile $ do
             posts <- recentFirst =<< loadAll ("blog/**/*.md" .&&. hasNoVersion)
-            let spIdents = ["profile.html", "contact.html", "blog.html", "media.html"]
+            let spIdents = [ "profile.html"
+                           , "contact.html"
+                           , "blog.html"
+                           , "media.html"
+                           , "repertoire.md" ]
             specialPages <- loadAll (fromList spIdents)
             -- load page/media list pages as well
             indexes <- loadAll "**/pagelist/**"
