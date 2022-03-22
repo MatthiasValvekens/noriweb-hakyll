@@ -201,7 +201,7 @@ JP
 +-------------------------------+---------------------------------------------+------------------+
 | Fafchamps, Jean-Luc           | Cerdis Zerom                                | Sop, Cl, Vc      |
 +-------------------------------+---------------------------------------------+------------------+
-| Fujita, Tomohito              | Ame no hi [雨の日]{.jp}                     | Sop, Cl, Pf      |
+| Fujita, Tomohito              | [Ame no hi]{.wcr} [雨の日]{.jp}             | Sop, Cl, Pf      |
 | [藤田友人]{.jp}               |                                             |                  |
 +-------------------------------+---------------------------------------------+------------------+
 | Frey, Jürg                    | Circular Music                              | Free             |
@@ -216,7 +216,7 @@ JP
 | Jamieson, Daryl               | [Saihōji]{.wcr}                             | Sop, Cor         |
 |                               |                                             | anglais, Perc    |
 +-------------------------------+---------------------------------------------+------------------+
-| Kaneda, Nozomu                | [Yukino kotoba, kotoba no yuki]{.wcr}       | Sop, Fl, Vc      |
+| Kaneda, Nozomu                | Yukino kotoba, kotoba no yuki               | Sop, Fl, Vc      |
 | [金田望]{.jp}                 | [雪の言葉、言葉の雪]{.jp}                   |                  |
 +-------------------------------+---------------------------------------------+------------------+
 | Kawashima, Motoharu           | [Invention VII]{.wcr}                       | Sop, Cl, Vib     |
@@ -260,13 +260,13 @@ JP
 |                               |                                             | - Sop, Fl, Vc,   |
 |                               |                                             |   Pf, Vn, Cl     |
 +-------------------------------+---------------------------------------------+------------------+
-| Sahara, Ko                    | Trio                                        | Sop, Cl, [Koto]  |
+| Sahara, Ko                    | [Trio]{.wcr}                                | Sop, Cl, [Koto]  |
 | [佐原洸]{.jp}                 |                                             |                  |
 +-------------------------------+---------------------------------------------+------------------+
 | Shimizu, Ittetsu              | - [Die Kontrafaktur]{.wcr}                  | - Sop, Pf, Sax   |
 | [清水一徹]{.jp}               | - [Die Kontrafaktur II]{.wcr}               | - Sop, Vn, Cb    |
 +-------------------------------+---------------------------------------------+------------------+
-| Suzuki, Haruyuki              | Hasen [破線]{.jp}                           | Sop, Cl, [Koto]  |
+| Suzuki, Haruyuki              | [Hasen]{.wcr} [破線]{.jp}                   | Sop, Cl, [Koto]  |
 | [鈴木治行]{.jp}               |                                             |                  |
 +-------------------------------+---------------------------------------------+------------------+
 | Trapani, Christofer           | Hafenlieder                                 | Sop, Fl, Acc     |
@@ -289,6 +289,9 @@ JP
 +-------------------------------+---------------------------------------------+
 | Kinoshita, Masamichi          | [Chushin / Kinen subeki kodama]{.wcr}       |
 | [木下正道]{.jp}               | [中心 / 記念すべき谺]{.jp}                  |
++-------------------------------+---------------------------------------------+
+| Scheuer, Benjamin             | Kaleidoscope for 4 female voices            |
+|                               | with additional instruments                 |
 +-------------------------------+---------------------------------------------+
 | Yamane, Akiko                 | [Onamae Collection No. 02]{.wcr}            |
 | [山根明季子]{.jp}             | [お名前コレクション No. 02]{.jp}            |
@@ -345,8 +348,8 @@ JP
 | Saariaho, Kaija               | Lonh                                        | Sop,             |
 |                               |                                             | Live electronics |
 +-------------------------------+---------------------------------------------+------------------+
-| n/a (improvisiation)          | Insomnia                                    | Sop,             |
-|                               |                                             | Live electronics |
+| Yakushiji, Noriko             | Insomnia                                    | Sop,             |
+| [薬師寺典子]{.jp}             |                                             | Live electronics |
 +-------------------------------+---------------------------------------------+------------------+
 
 
