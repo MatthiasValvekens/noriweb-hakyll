@@ -17,7 +17,7 @@
             <li><a class="pagination-link" aria-label="Goto page $firstPageNum$" href="$firstPageUrl$">$firstPageNum$</a></li>
             $endif$
             $if(pagesBefore)$
-            $if(elideBefore)$ <li><span class="pagination-ellipsis">&hellip;</span></li> $endif$
+            $if(elideBefore)$ <li><span class="pagination-ellipsis" aria-hidden="true" style="color: #555">&hellip;</span></li> $endif$
             $for(pagesBefore)$
                 <li><a class="pagination-link" aria-label="Goto page $pageNum$" href="$pageUrl$">$pageNum$</a></li>
             $endfor$
@@ -28,7 +28,7 @@
             $for(pagesAfter)$
                 <li><a class="pagination-link" aria-label="Goto page $pageNum$" href="$pageUrl$">$pageNum$</a></li>
             $endfor$
-            $if(elideAfter)$ <li><span class="pagination-ellipsis">&hellip;</span></li> $endif$
+            $if(elideAfter)$ <li><span class="pagination-ellipsis" aria-hidden="true" style="color: #555">&hellip;</span></li> $endif$
             $endif$
 
             $if(lastPageNum)$
