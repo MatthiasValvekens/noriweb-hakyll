@@ -14,7 +14,7 @@ Table of contents
 - [Duo pieces](#duo-pieces)
 - [Chamber music](#chamber-music)
 - [Vocal ensemble](#vocal-ensemble)
-- [Opera and music theater](#opera-music-theater)
+- [Opera, oratorio and music theater](#opera-music-theater)
 - [With electronics](#with-electronics)
 :::
 
@@ -313,11 +313,13 @@ JP
 +-------------------------------+---------------------------------------------+
 
 
-# Opera and music theater {#opera-music-theater}
+# Opera, oratorio and music theater {#opera-music-theater}
 
 +-------------------------------+---------------------------------------------+-----------------+
 | Composer                      | Work(s)                                     | Role(s)         |
 +===============================+=============================================+=================+
+| Maertens, Sybrand             | [Hooglied in zang en zand]{.wcr}            | Bride           |
++-------------------------------+---------------------------------------------+-----------------+
 | Matsudaira, Yoriaki           | [The Provocators]{.wcr}                     | Alto            |
 | [松平頼暁]{.jp}               | [挑発者たち]{.jp}                           |                 |
 +-------------------------------+---------------------------------------------+-----------------+
