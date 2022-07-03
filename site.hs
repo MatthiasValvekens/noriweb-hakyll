@@ -93,6 +93,34 @@ hakyllRules = do
             makeItem ("" :: String)
                 >>= loadAndApplyTemplate "templates/sitemap.xml" (rootCtx <> pgCtx)
 
+    match "photos/**/*.jpg" $ do
+        route idRoute
+        compile copyFileCompiler
+
+    -- not routable!
+    match "photos/**/meta.md" $ compile $ do
+        -- get the folder pattern by stripping off /meta.md
+        ident <- show <$> getUnderlying
+        let pattern' = take (length ident - 8) ident
+        let pattern = fromGlob $ pattern' <> "/*.jpg"
+        let photoCtx = field "photo-path" (routeOrFail . itemIdentifier)
+        let ctx = fieldFromItemMeta "credit"
+                <> fieldFromItemMeta "title"
+                <> listField "photos" (photoCtx :: Context CopyFile) (loadAll pattern)
+        -- TODO pandocify this if it comes to that
+        getResourceBody >>= loadAndApplyTemplate "templates/photo-section.html" ctx
+
+    match "photos.html" $ do
+        route idRoute
+        compile $ do
+            sections <- recentFirst =<< loadAll "photos/**/meta.md"
+            let ctx = constField "title" "Photos"
+                    <> listField "photo-sections" defaultContext (return sections)
+                    <> copyrightContext
+                    <> defaultContext
+            getResourceBody >>= applyAsTemplate ctx
+                >>= loadAndApplyTemplate "templates/default.html" ctx
+
     blogPagination <- do
         let grp = liftM (paginateEvery 5) . sortRecentFirst
         buildPaginateWith grp ("blog/**/*.md" .&&. hasNoVersion) blogPageId

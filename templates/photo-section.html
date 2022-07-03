@@ -1,0 +1,16 @@
+<!-- TODO improve template -->
+<section class="section">
+    <h2 class="title has-text-centered">$title$</h2>
+    $if(credit)$<p lang="en">Photo credit: $credit$</p>$endif$
+    <ul class="container">
+    $for(photos)$
+    <li class="media">
+        <div class="media-content">
+            <div class="content">
+                <img src="$photo-path$"/>
+            </div>
+        </div>
+    </li>
+    $endfor$
+    </ul>
+</section>
