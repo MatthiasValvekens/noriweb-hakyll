@@ -27,3 +27,9 @@
 .link-list li:not(:last-child) {
     margin-bottom: 1ex;
 }
+
+.photo-section img.photo {
+    max-width: 80vw;
+    max-height: 90vh;
+    object-fit: contain;
+}

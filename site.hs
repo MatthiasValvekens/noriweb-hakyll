@@ -103,9 +103,11 @@ hakyllRules = do
         ident <- show <$> getUnderlying
         let pattern' = take (length ident - 8) ident
         let pattern = fromGlob $ pattern' <> "/*.jpg"
+        title <- getUnderlying >>= getStringFromMeta "title"
         let photoCtx = field "photo-path" (routeOrFail . itemIdentifier)
+                     <> constField "title" title
         let ctx = fieldFromItemMeta "credit"
-                <> fieldFromItemMeta "title"
+                <> constField "title" title
                 <> listField "photos" (photoCtx :: Context CopyFile) (loadAll pattern)
         -- TODO pandocify this if it comes to that
         getResourceBody >>= loadAndApplyTemplate "templates/photo-section.html" ctx
