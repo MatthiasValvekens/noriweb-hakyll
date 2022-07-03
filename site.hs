@@ -83,6 +83,7 @@ hakyllRules = do
                            , "contact.html"
                            , "blog.html"
                            , "media.html"
+                           , "photos.html"
                            , "repertoire.md" ]
             specialPages <- loadAll (fromList spIdents)
             -- load page/media list pages as well
