@@ -1,0 +1,9 @@
+name: Publish site builder image
+on:
+  workflow_dispatch: {}
+
+jobs:
+  publish-builder:
+    uses: MatthiasValvekens/gha-hakyll-build/.github/workflows/release-build-image.yml@v1
+    with:
+      ghc-version: 8.10.7
