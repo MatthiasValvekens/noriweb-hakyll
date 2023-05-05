@@ -1,0 +1,50 @@
+name: Build and deploy website
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: environment
+  push: {}
+
+jobs:
+  extract-params:
+    name: Determine release parameters
+    runs-on: ubuntu-latest
+    permissions: {}
+    outputs:
+      publish-env: ${{ steps.setenv.outputs.envname }}
+    steps:
+      - id: setenv
+        run: |
+          if [[ $GITHUB_EVENT_NAME == 'workflow_dispatch' ]]; then
+              echo "envname=${{ inputs.environment }}" >> "$GITHUB_OUTPUT"
+          else
+              echo envname=staging >> "$GITHUB_OUTPUT"
+          fi
+  build-content:
+    uses: MatthiasValvekens/gha-hakyll-build/.github/workflows/build-website.yml@v1
+    permissions:
+      contents: read
+      packages: read
+      id-token: write
+  deploy:
+    runs-on: ubuntu-latest
+    if: ${{ github.ref == 'refs/heads/master' || github.event_name == 'workflow_dispatch' }}
+    needs: [build-content,extract-params]
+    environment: ${{ needs.extract-params.outputs.publish-env }}
+    steps:
+    - name: Download generated content
+      uses: actions/download-artifact@v3
+      with:
+        name: website-content
+        path: _site/
+    - name: Upload to server
+      uses: burnett01/rsync-deployments@5.2.1
+      with:
+        switches: -avzr
+        path: _site/
+        remote_path: ${{ secrets.DEPLOY_PATH }}
+        remote_host: ${{ secrets.DEPLOY_HOST }}
+        remote_port: ${{ secrets.DEPLOY_PORT }}
+        remote_user: ${{ secrets.DEPLOY_USER }}
+        remote_key: ${{ secrets.SSH_PRIVATE_KEY }}
