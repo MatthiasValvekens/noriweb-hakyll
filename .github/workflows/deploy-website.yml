@@ -24,7 +24,7 @@ jobs:
         run: |
           if [[ $GITHUB_EVENT_NAME == 'workflow_dispatch' ]]; then
               echo "envname=${{ inputs.environment }}" >> "$GITHUB_OUTPUT"
-          if [[ $GITHUB_EVENT_NAME == 'pull_request_target' && $MERGED == 'true' ]]; then
+          elif [[ $GITHUB_EVENT_NAME == 'pull_request_target' && $MERGED == 'true' ]]; then
               echo envname=release >> "$GITHUB_OUTPUT"
           else
               echo envname=staging >> "$GITHUB_OUTPUT"
