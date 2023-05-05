@@ -48,7 +48,7 @@ jobs:
       with:
         name: website-content
         path: _site/
-    - name: Upload to server
+    - name: Upload to ${{ needs.extract-params.outputs.publish-env }}
       uses: burnett01/rsync-deployments@5.2.1
       with:
         switches: -avzr
