@@ -39,7 +39,6 @@ jobs:
       id-token: write
   deploy:
     runs-on: ubuntu-latest
-    if: ${{ github.ref == 'refs/heads/master' || github.event_name == 'workflow_dispatch' }}
     needs: [build-content,extract-params]
     environment: ${{ needs.extract-params.outputs.publish-env }}
     steps:
