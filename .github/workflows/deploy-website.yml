@@ -4,8 +4,14 @@ on:
     inputs:
       environment:
         type: environment
-  push: {}
-
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+    types: [ opened, reopened, synchronize ]
+  pull_request_target:
+    branches: [ master ]
+    types: [ closed ]
 jobs:
   extract-params:
     name: Determine release parameters
@@ -18,9 +24,13 @@ jobs:
         run: |
           if [[ $GITHUB_EVENT_NAME == 'workflow_dispatch' ]]; then
               echo "envname=${{ inputs.environment }}" >> "$GITHUB_OUTPUT"
+          if [[ $GITHUB_EVENT_NAME == 'pull_request_target' && $MERGED == 'true' ]]; then
+              echo envname=release >> "$GITHUB_OUTPUT"
           else
               echo envname=staging >> "$GITHUB_OUTPUT"
           fi
+        env:
+          MERGED: ${{ github.event.pull_request.merged }}
   build-content:
     uses: MatthiasValvekens/gha-hakyll-build/.github/workflows/build-website.yml@v1
     permissions:
