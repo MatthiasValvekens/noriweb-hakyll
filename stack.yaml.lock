@@ -5,16 +5,15 @@
 
 packages:
 - completed:
-    hackage: hakyll-4.14.1.0@sha256:3afc2e60d14388792dfaf3592d489e21fd48a0abd47f0dbfbf9ab7ec25e582cd,9290
+    hackage: hakyll-4.15.1.1@sha256:707990cc15bcc9637519dbb3382dfa790f20191a86e988dab2824f5f6bc7ed87,9962
     pantry-tree:
-      size: 8490
-      sha256: f5242fdbfbed08b7374055b5236dfff8220a964563e3268eadd8a0c7b1cb5d8a
+      sha256: f61b63725d954d7feea4dc0697771a112c89018c7295c8ee5858f72fcdd384f6
+      size: 8861
   original:
-    hackage: hakyll-4.14.1.0
+    hackage: hakyll-4.15.1.1
 snapshots:
 - completed:
-    size: 587546
-    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/18/10.yaml
-    sha256: 88b4f81e162ba3adc230a9fcccc4d19ac116377656bab56c7382ca88598b257a
-  original:
-    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/18/10.yaml
+    sha256: 42f77c84b34f68c30c2cd0bf8c349f617a0f428264362426290847a6a2019b64
+    size: 649618
+    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/20/19.yaml
+  original: lts-20.19

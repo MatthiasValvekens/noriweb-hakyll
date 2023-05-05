@@ -9,7 +9,6 @@ import Text.Pandoc (writeMarkdown, runPure)
 
 import qualified Data.Text as T
 import qualified Data.Map as M
-import qualified Data.HashMap.Strict as HMS
 import Data.Text.Encoding (encodeUtf8, decodeUtf8)
 
 import Data.ByteString.Lazy (toStrict)
@@ -18,6 +17,8 @@ import Control.Monad ((>=>), msum, liftM)
 
 import qualified GHC.IO.Encoding as E
 
+import qualified Data.Aeson.Key as Aes
+import qualified Data.Aeson.KeyMap as Aes
 import qualified Data.Aeson as Aes
 
 
@@ -358,7 +359,7 @@ formatInlineMetadata orig@(CodeBlock attr jsonMeta)
                         >>= loadAndApplyTemplate templateName ctx
         return $ RawBlock "html" $ T.pack $ itemBody metaItem
     where (elId, classes, _) = attr
-          insertDefault k defaultVal = HMS.alterF alter k
+          insertDefault k defaultVal = Aes.alterF alter k
             where alter Nothing = Just <$> defaultVal
                   alter (Just x) = return (Just x)
           templateName = "templates/jsonld/jsonld-meta.html"
@@ -371,10 +372,10 @@ formatInlineMetadata orig@(CodeBlock attr jsonMeta)
 formatInlineMetadata orig = return orig
 
 
-extractStringOrFail :: T.Text -> Aes.Object -> Compiler String
-extractStringOrFail key obj = case HMS.lookup key obj of
+extractStringOrFail :: Aes.Key -> Aes.Object -> Compiler String
+extractStringOrFail key obj = case Aes.lookup key obj of
         Just (Aes.String x) -> return (T.unpack x)
-        _ -> fail $ "No string key " ++ T.unpack key ++ " in JSON meta"
+        _ -> fail $ "No string key " ++ Aes.toString key ++ " in JSON meta"
 
 
 data Embedded = Embedded T.Text T.Text [Block] String (Maybe T.Text)
@@ -407,20 +408,20 @@ formatYoutubeFromMeta (Embedded ytid name descr captionStyle mbUploadDate) jsonM
         -- only override name/description if actually provided
         let nameIns = if T.null name
                       then id
-                      else HMS.insert "name" (Aes.String name)
+                      else Aes.insert "name" (Aes.String name)
         let uplDateInsert = case mbUploadDate of
                 Nothing -> id
-                Just dt -> HMS.insert "uploadDate" (Aes.String dt)
+                Just dt -> Aes.insert "uploadDate" (Aes.String dt)
         descrText <- descrTextM descr (T.pack title)
         let newObj = nameIns $ uplDateInsert
-                   $ HMS.insert "width" (Aes.Number width)
-                   $ HMS.insert "height" (Aes.Number height)
-                   $ HMS.insert "description" (Aes.String descrText)
-                   $ HMS.insert "name" (Aes.String $ T.pack title)
-                   $ HMS.insert "url" (Aes.String videoUrl)
-                   $ HMS.insert "embedUrl" (Aes.String embedUrl)
-                   $ HMS.insert "thumbnailUrl" (Aes.String thumbnailUrl)
-                   $ HMS.insert "contentUrl" (Aes.String contentUrl) rawObj
+                   $ Aes.insert "width" (Aes.Number width)
+                   $ Aes.insert "height" (Aes.Number height)
+                   $ Aes.insert "description" (Aes.String descrText)
+                   $ Aes.insert "name" (Aes.String $ T.pack title)
+                   $ Aes.insert "url" (Aes.String videoUrl)
+                   $ Aes.insert "embedUrl" (Aes.String embedUrl)
+                   $ Aes.insert "thumbnailUrl" (Aes.String thumbnailUrl)
+                   $ Aes.insert "contentUrl" (Aes.String contentUrl) rawObj
         let ctx = constField "width" (show width) <> constField "height" (show height)
                 <> constField "embed-url" (T.unpack embedUrl)
                 <> constField "video-url" (T.unpack videoUrl)
@@ -479,14 +480,14 @@ formatSoundcloudFromMeta (Embedded trackId name descr captionStyle mbUploadDate)
         -- only override name/description if actually provided
         let nameIns = if T.null name
                       then id
-                      else HMS.insert "name" (Aes.String name)
+                      else Aes.insert "name" (Aes.String name)
         let uplDateInsert = case mbUploadDate of
                 Nothing -> id
-                Just dt -> HMS.insert "uploadDate" (Aes.String dt)
+                Just dt -> Aes.insert "uploadDate" (Aes.String dt)
         descrText <- descrTextM descr (T.pack title)
         let newObj = nameIns $ uplDateInsert
-                   $ HMS.insert "description" (Aes.String descrText)
-                   $ HMS.insert "embedUrl" (Aes.String embedUrl) rawObj
+                   $ Aes.insert "description" (Aes.String descrText)
+                   $ Aes.insert "embedUrl" (Aes.String embedUrl) rawObj
         let ctx = constField "embed-url" (T.unpack embedUrl)
                 <> constField "soundcloud-url" url
                 <> constField "soundcloud-meta" (jsonString newObj)
