@@ -12,6 +12,7 @@ on:
   pull_request_target:
     branches: [ master ]
     types: [ closed ]
+    # Update release on merge, rollback staging on PR closure
 jobs:
   extract-params:
     name: Determine release parameters
