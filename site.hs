@@ -85,6 +85,7 @@ hakyllRules = do
                            , "blog.html"
                            , "media.html"
                            , "photos.html"
+                           , "reviews.md"
                            , "repertoire.md" ]
             specialPages <- loadAll (fromList spIdents)
             -- load page/media list pages as well
@@ -181,6 +182,15 @@ hakyllRules = do
         route (setExtension ".html")
         compile $ do
             let ctx = field "extrastyle" (const $ loadBody "snippets/repertoire.css")
+                    <> copyrightContext <> defaultContext
+            genericPageCompiler 
+                >>= loadAndApplyTemplate "templates/generic.html" ctx
+                >>= loadAndApplyTemplate "templates/default.html" ctx
+
+    match "reviews.md" $ do
+        route (setExtension ".html")
+        compile $ do
+            let ctx = field "extrastyle" (const $ loadBody "snippets/reviews.css")
                     <> copyrightContext <> defaultContext
             genericPageCompiler 
                 >>= loadAndApplyTemplate "templates/generic.html" ctx
