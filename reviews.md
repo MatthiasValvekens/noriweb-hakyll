@@ -4,7 +4,7 @@ title: "Reviews"
 
 # B → C recital
 
-<figure class="image"><img src="/photos/b2c/chirashi.jpg" class="photo" alt="Photo: B → C"></figure>
+<figure class="image"><img src="/photos/b2c/stage.jpg" class="photo" alt="Photo: B → C"></figure>
 
 ## バッハからコンテンポラリーへ {lang=ja}
 

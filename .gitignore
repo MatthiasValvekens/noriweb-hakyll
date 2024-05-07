@@ -34,3 +34,4 @@ _cache/
 _site/
 deploy.sh
 workspace_data
+.DS_Store
