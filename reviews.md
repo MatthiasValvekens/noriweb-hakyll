@@ -4,7 +4,10 @@ title: "Reviews"
 
 # B → C recital
 
-<figure class="image"><img src="/photos/b2c/stage.jpg" class="photo" alt="Photo: B → C"></figure>
+<figure class="image">
+<img src="/photos/b2c/stage.jpg" class="photo" alt="Photo: B → C">
+<p>Photo: Naoya Ikegami</p>
+</figure>
 
 ## バッハからコンテンポラリーへ {lang=ja}
 
@@ -30,7 +33,10 @@ title: "Reviews"
 
 # Amidst dust and fractured voices / PLAT HOME
 
-<figure class="image"><img src="/photos/plat-home/1.jpg" class="photo" alt="Photo: PLAT HOME"></figure>
+<figure class="image">
+<img src="/photos/plat-home/1.jpg" class="photo" alt="Photo: PLAT HOME">
+<p>Photo: Ayane Shindo</p>
+</figure>
 
 ## サントリー芸術財団「日本の作曲2020-2022」 {lang=ja}
 
