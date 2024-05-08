@@ -6,7 +6,7 @@ title: "Reviews"
 
 <figure class="image">
 <img src="/photos/b2c/stage.jpg" class="photo" alt="Photo: B → C">
-<p>Photo: Naoya Ikegami</p>
+<p>Photo: Naoya Ikegami / 池上直哉</p>
 </figure>
 
 ## バッハからコンテンポラリーへ {lang=ja}
