@@ -12,6 +12,9 @@ She appeared at such festivals as Ars Musica in Belgium, Belgian Music Days,  Si
 
 Her performance of "The Music of Furniture" by Yuki Nakahashi was aired on national radio (NHK-FM).
 
+She is also interested in pop culture: in 2025 she performed as soloist for the Studio Ghibli & Anime song concert in a European tour at the Muziekgebouw Eindhoven, Afas Circustheater van
+Den Haag and other venues.
+
 She is one of the founding members of Uguisu Labo, which specialises in contemporary music for everyone from babies to adults, with voice and electronics.
 
 As a member of Uta × Koto, an ensemble of contemporary voice, koto and clarinet formed by composer Sehyon Jo in 2018, she explores new expression through a combination of contemporary and classical, western and oriental that transcends time and space.
