@@ -33,7 +33,7 @@ jobs:
         env:
           MERGED: ${{ github.event.pull_request.merged }}
   build-content:
-    uses: MatthiasValvekens/gha-hakyll-build/.github/workflows/build-website.yml@v1
+    uses: MatthiasValvekens/gha-hakyll-build/.github/workflows/build-website.yml@v2
     permissions:
       contents: read
       packages: read
@@ -52,7 +52,7 @@ jobs:
         role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE }}
         aws-region: ${{ vars.AWS_REGION }}
     - name: Download generated content
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: website-content
         path: _site/
