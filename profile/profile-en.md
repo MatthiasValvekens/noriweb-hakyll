@@ -15,7 +15,7 @@ Her performance of "The Music of Furniture" by Yuki Nakahashi was aired on natio
 
 She is also interested in pop culture: in 2025 she performed as soloist for the Studio Ghibli & Anime song concert in a European tour at the Muziekgebouw Eindhoven, Afas Circustheater Den Haag and other venues.
 
-Together with Quentin Meurisse, she formed the duo Uguisu Labo, which specialises in contemporary music for everyone from babies to adults, with voice and electronics.
+Together with Quentin Meurisse, she formed the duo Uguisu Labo, which specialises in contemporary music for everyone from babies to adults, with voice and electronics. Uguisu Labo appeared at the Festival Mosaïques in Brussels.
 
 As a member of Uta × Koto, an ensemble of contemporary voice, koto and clarinet formed by composer Sehyon Jo in 2018, she explores new expression through a combination of contemporary and classical, western and oriental that transcends time and space.
 
